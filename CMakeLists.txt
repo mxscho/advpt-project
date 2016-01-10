@@ -21,9 +21,39 @@ message("-- INFO: CXX compiler flags: " ${CMAKE_CXX_FLAGS})
 # Add header and source files.
 set(HEADER_FILES
 	${HEADER_DIRECTORY}/debug.h
+	${HEADER_DIRECTORY}/game/blueprint.h
+	${HEADER_DIRECTORY}/game/building.h
+	${HEADER_DIRECTORY}/game/building_blueprint.h
+	${HEADER_DIRECTORY}/game/building_construction.h
+	${HEADER_DIRECTORY}/game/game.h
+	${HEADER_DIRECTORY}/game/protoss_game.h
+	${HEADER_DIRECTORY}/game/race.h
+	${HEADER_DIRECTORY}/game/terran_building_construction.h
+	${HEADER_DIRECTORY}/game/terran_game.h
+	${HEADER_DIRECTORY}/game/unit.h
+	${HEADER_DIRECTORY}/game/unit_blueprint.h
+	${HEADER_DIRECTORY}/game/unit_production.h
+	${HEADER_DIRECTORY}/game/updatable.h
+	${HEADER_DIRECTORY}/game/worker_unit_allocation.h
+	${HEADER_DIRECTORY}/game/zerg_game.h
 )
 set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/main.cpp
+	${SOURCE_DIRECTORY}/game/blueprint.cpp
+	${SOURCE_DIRECTORY}/game/building.cpp
+	${SOURCE_DIRECTORY}/game/building_blueprint.cpp
+	${SOURCE_DIRECTORY}/game/building_construction.cpp
+	${SOURCE_DIRECTORY}/game/game.cpp
+	${SOURCE_DIRECTORY}/game/protoss_game.cpp
+	${SOURCE_DIRECTORY}/game/race.cpp
+	${SOURCE_DIRECTORY}/game/terran_building_construction.cpp
+	${SOURCE_DIRECTORY}/game/terran_game.cpp
+	${SOURCE_DIRECTORY}/game/unit.cpp
+	${SOURCE_DIRECTORY}/game/unit_blueprint.cpp
+	${SOURCE_DIRECTORY}/game/unit_production.cpp
+	${SOURCE_DIRECTORY}/game/updatable.cpp
+	${SOURCE_DIRECTORY}/game/worker_unit_allocation.cpp
+	${SOURCE_DIRECTORY}/game/zerg_game.cpp
 )
 
 # Add binary.
