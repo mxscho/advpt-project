@@ -1,4 +1,4 @@
-#include "game/building.h"
+﻿#include "game/building.h"
 
 #include "game/building_blueprint.h"
 
@@ -20,7 +20,7 @@ const std::list<UnitProduction>& Building::get_current_unit_productions() const 
 bool Building::can_produce_unit(const UnitBlueprint& unit_blueprint) const {
 	auto& producible_unit_blueprints = m_building_blueprint.get_producible_unit_blueprints();
 	for (auto i = producible_unit_blueprints.begin(); i != producible_unit_blueprints.end(); ++i) {
-		if (*i == &unit_blueprint) {
+		if (&i->get() == &unit_blueprint) {
 			return m_current_unit_productions.size() < m_building_blueprint.get_max_concurrent_unit_production_count();
 		}
 	}

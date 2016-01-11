@@ -1,16 +1,12 @@
-#pragma once 
+﻿#pragma once 
 
 #include "game/game.h"
 #include "game/updatable.h"
 
 class ZergGame : public Game {
 public:
-	ZergGame(const std::list<BuildingBlueprint>& building_blueprints,
-		const std::list<UnitBlueprint>& unit_blueprints,
-		unsigned int mineral_count,
-		unsigned int vespene_gas_count,
-		const std::list<Building>& buildings,
-		const std::list<Unit>& units);
+	ZergGame(unsigned int mineral_count,
+		unsigned int vespene_gas_count);
 
 	const std::list<BuildingConstruction>& get_current_building_constructions() const;
 

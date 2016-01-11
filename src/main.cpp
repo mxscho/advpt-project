@@ -1,4 +1,4 @@
-#include "debug.h"
+﻿#include "debug.h"
 
 #include "game/building_blueprint.h"
 #include "game/terran_game.h"
@@ -10,8 +10,10 @@ void example() {
 	LOG_INFO("Default log test.");
 	LOG_DEBUG("Debug log test.");
 	LOG_ERROR("Error log test.");
+	
+	TerranGame terran_game(50, 0);
 
-	UnitBlueprint terran_scv_unit_blueprint(
+	terran_game.add_unit_blueprint(UnitBlueprint(
 		Race::Terran, // Race
 		"SCV", // Name
 		50, // Mineral costs
@@ -26,9 +28,8 @@ void example() {
 		1, // Supply costs,
 		0, // Mineral collection rate
 		0, // Vespine gas collection rate
-		true // Is builder
-	);
-	BuildingBlueprint terran_command_center_blueprint(
+		true)); // Is builder
+	terran_game.add_building_blueprint(BuildingBlueprint(
 		Race::Terran, // Race
 		"Command Center", // Name
 		400, // Mineral costs
@@ -40,27 +41,22 @@ void example() {
 		200, // Max energy
 		9, // Supply provided
 		{}, // Morphable blueprints
-		{ &terran_scv_unit_blueprint }, // Producible unit blueprints
-		1 // Max concurrent unit production count
-		);
+		{ terran_game.find_unit_blueprint_by_name("SCV") }, // Producible unit blueprints
+		1)); // Max concurrent unit production count
 
-	std::list<BuildingBlueprint> building_blueprints = {
-		terran_command_center_blueprint
-	};
-	std::list<UnitBlueprint> unit_blueprints = {
-		terran_scv_unit_blueprint
-	};
+	terran_game.add_building_by_name("Command Center");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
 
-	std::list<Building> buildings = {
-		Building(terran_command_center_blueprint)
-	};
-
-	TerranGame terran_game(building_blueprints, unit_blueprints, 50, 0, buildings, {});
 	// Can we produce a SCV?
-	std::cout << "Expected: true, Is: " << (terran_game.can_produce_unit(terran_scv_unit_blueprint) ? "true" : "false") << std::endl;
-	terran_game.produce_unit(terran_scv_unit_blueprint);
+	std::cout << "Expected: true, Is: " << (terran_game.can_produce_unit_by_name("SCV") ? "true" : "false") << std::endl;
+	terran_game.produce_unit_by_name("SCV");
 	// Can we produce another one? (Obviously no because no minerals are left and all buildings are occupied.)
-	std::cout << "Expected: false, Is: " << (terran_game.can_produce_unit(terran_scv_unit_blueprint) ? "true" : "false") << std::endl;
+	std::cout << "Expected: false, Is: " << (terran_game.can_produce_unit_by_name("SCV") ? "true" : "false") << std::endl;
 }
 
 int main() {

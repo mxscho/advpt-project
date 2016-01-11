@@ -1,17 +1,8 @@
-#include "game/zerg_game.h"
+﻿#include "game/zerg_game.h"
 
-ZergGame::ZergGame(const std::list<BuildingBlueprint>& building_blueprints,
-	const std::list<UnitBlueprint>& unit_blueprints,
-	unsigned int mineral_count,
-	unsigned int vespene_gas_count,
-	const std::list<Building>& buildings,
-	const std::list<Unit>& units)
-	: Game(building_blueprints,
-		unit_blueprints,
-		mineral_count,
-		vespene_gas_count,
-		buildings,
-		units),
+ZergGame::ZergGame(unsigned int mineral_count,
+	unsigned int vespene_gas_count)
+	: Game(mineral_count, vespene_gas_count),
 	m_current_building_constructions() {
 }
 

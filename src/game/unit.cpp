@@ -1,4 +1,4 @@
-#include "game/unit.h"
+﻿#include "game/unit.h"
 
 Unit::Unit(const UnitBlueprint& unit_blueprint)
 	: m_unit_blueprint(unit_blueprint) {

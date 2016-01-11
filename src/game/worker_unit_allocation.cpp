@@ -1,4 +1,4 @@
-#include "game/worker_unit_allocation.h"
+﻿#include "game/worker_unit_allocation.h"
 
 WorkerUnitAllocation::WorkerUnitAllocation(unsigned int mineral_collecting_count, unsigned int vespene_gas_collecting_count)
 	: m_mineral_collecting_count(mineral_collecting_count),

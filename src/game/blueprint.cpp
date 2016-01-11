@@ -1,16 +1,16 @@
-#include "game/blueprint.h"
+﻿#include "game/blueprint.h"
 
 Blueprint::Blueprint(const Race& race,
 	const std::string& name,
 	unsigned int mineral_costs,
 	unsigned int vespene_gas_costs,
-	const std::list<Blueprint>& dependency_blueprints,
+	const std::list<std::reference_wrapper<const Blueprint>>& dependency_blueprints,
 	unsigned int creation_duration_seconds,
 	unsigned int life_duration_seconds,
 	unsigned int start_energy,
 	unsigned int max_energy,
 	unsigned int supply_provided,
-	const std::list<std::list<Blueprint>>& morphable_blueprints)
+	const std::list<std::list<std::reference_wrapper<const Blueprint>>>& morphable_blueprints)
 	: m_race(race),
 	m_name(name),
 	m_mineral_costs(mineral_costs),
@@ -22,6 +22,8 @@ Blueprint::Blueprint(const Race& race,
 	m_max_energy(max_energy),
 	m_supply_provided(supply_provided),
 	m_morphable_blueprints(morphable_blueprints) {
+}
+Blueprint::~Blueprint() {
 }
 
 const Race& Blueprint::get_race() const {
@@ -36,7 +38,7 @@ unsigned int Blueprint::get_mineral_costs() const {
 unsigned int Blueprint::get_vespene_gas_costs() const {
 	return m_vespene_gas_costs;
 }
-const std::list<Blueprint>& Blueprint::get_dependency_blueprints() const {
+const std::list<std::reference_wrapper<const Blueprint>>& Blueprint::get_dependency_blueprints() const {
 	return m_dependency_blueprints;
 }
 unsigned int Blueprint::get_creation_duration_seconds() const {
@@ -54,6 +56,6 @@ unsigned int Blueprint::get_max_energy() const {
 unsigned int Blueprint::get_supply_provided() const {
 	return m_supply_provided;
 }
-const std::list<std::list<Blueprint>>& Blueprint::get_morphable_blueprints() const {
+const std::list<std::list<std::reference_wrapper<const Blueprint>>>& Blueprint::get_morphable_blueprints() const {
 	return m_morphable_blueprints;
 }

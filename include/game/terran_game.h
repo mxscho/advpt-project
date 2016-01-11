@@ -1,4 +1,4 @@
-#pragma once 
+﻿#pragma once 
 
 #include "game/game.h"
 #include "game/terran_building_construction.h"
@@ -6,12 +6,8 @@
 
 class TerranGame : public Game {
 public:
-	TerranGame(const std::list<BuildingBlueprint>& building_blueprints,
-		const std::list<UnitBlueprint>& unit_blueprints,
-		unsigned int mineral_count,
-		unsigned int vespene_gas_count,
-		const std::list<Building>& buildings,
-		const std::list<Unit>& units);
+	TerranGame(unsigned int mineral_count,
+		unsigned int vespene_gas_count);
 
 	const std::list<TerranBuildingConstruction>& get_current_terran_building_constructions() const;
 

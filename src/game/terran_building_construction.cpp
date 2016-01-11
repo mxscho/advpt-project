@@ -1,4 +1,4 @@
-#include "game/terran_building_construction.h"
+﻿#include "game/terran_building_construction.h"
 
 TerranBuildingConstruction::TerranBuildingConstruction(const BuildingBlueprint& building_blueprint, const Unit& worker_unit)
 	: BuildingConstruction(building_blueprint),
