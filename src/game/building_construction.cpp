@@ -20,8 +20,5 @@ Building BuildingConstruction::spawn_building() const {
 }
 
 void BuildingConstruction::update(unsigned int elapsed_time_seconds) {
-	m_remaining_creation_duration_seconds -= elapsed_time_seconds;
-	if (m_remaining_creation_duration_seconds < 0) {
-		m_remaining_creation_duration_seconds = 0;
-	}
+	m_remaining_creation_duration_seconds -= elapsed_time_seconds < m_remaining_creation_duration_seconds ? elapsed_time_seconds : m_remaining_creation_duration_seconds;
 }

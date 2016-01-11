@@ -33,12 +33,11 @@ void UnitProduction::update(unsigned int elapsed_time_seconds) {
 		unsigned int boost_duration_seconds = elapsed_time_seconds <= m_remaining_boost_duration_seconds ? elapsed_time_seconds : m_remaining_boost_duration_seconds;
 		m_remaining_boost_duration_seconds -= boost_duration_seconds;
 		elapsed_time_seconds -= boost_duration_seconds;
-		m_remaining_creation_duration_milliseconds -= boost_duration_seconds * m_boost_factor * 10;
+		unsigned int boosted_duration_milliseconds = boost_duration_seconds * m_boost_factor * 10;
+		m_remaining_creation_duration_milliseconds -= boosted_duration_milliseconds < m_remaining_creation_duration_milliseconds ? boosted_duration_milliseconds : m_remaining_creation_duration_milliseconds;
 	}
 	if (elapsed_time_seconds > 0) {
-		m_remaining_creation_duration_milliseconds -= elapsed_time_seconds * 1000;
-	}
-	if (m_remaining_creation_duration_milliseconds < 0) {
-		m_remaining_creation_duration_milliseconds = 0;
+		unsigned int elapsed_time_milliseconds = elapsed_time_seconds * 1000;
+		m_remaining_creation_duration_milliseconds -= elapsed_time_milliseconds < m_remaining_creation_duration_milliseconds ? elapsed_time_milliseconds : m_remaining_creation_duration_milliseconds;
 	}
 }
