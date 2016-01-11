@@ -3,6 +3,7 @@
 #include "game/blueprint.h"
 #include "game/unit_blueprint.h"
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -20,14 +21,17 @@ public:
 		unsigned int start_energy,
 		unsigned int max_energy,
 		unsigned int supply_provided,
-		const std::list<std::list<std::reference_wrapper<const Blueprint>>>& morphable_blueprints,
-		// The actual unit blueprints are stored in a Game instance. This is just a list of pointers to them.
+		const std::list<std::reference_wrapper<const BuildingBlueprint>>& morphable_building_blueprints,
 		const std::list<std::reference_wrapper<const UnitBlueprint>>& producible_unit_blueprints,
 		unsigned int max_concurrent_unit_production_count);
 
+	const std::list<std::reference_wrapper<const BuildingBlueprint>>& get_morphable_building_blueprints() const;
+	void add_morphable_building_blueprint(const BuildingBlueprint& building_blueprint);
 	const std::list<std::reference_wrapper<const UnitBlueprint>>& get_producible_unit_blueprints() const;
+	void add_producible_unit_blueprint(const UnitBlueprint& unit_blueprint);
 	unsigned int get_max_concurrent_unit_production_count() const;
 private:
+	std::list<std::reference_wrapper<const BuildingBlueprint>> m_morphable_building_blueprints;
 	std::list<std::reference_wrapper<const UnitBlueprint>> m_producible_unit_blueprints;
 	unsigned int m_max_concurrent_unit_production_count;
 };

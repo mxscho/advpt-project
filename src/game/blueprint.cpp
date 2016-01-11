@@ -9,8 +9,7 @@ Blueprint::Blueprint(const Race& race,
 	unsigned int life_duration_seconds,
 	unsigned int start_energy,
 	unsigned int max_energy,
-	unsigned int supply_provided,
-	const std::list<std::list<std::reference_wrapper<const Blueprint>>>& morphable_blueprints)
+	unsigned int supply_provided)
 	: m_race(race),
 	m_name(name),
 	m_mineral_costs(mineral_costs),
@@ -20,8 +19,7 @@ Blueprint::Blueprint(const Race& race,
 	m_life_duration_seconds(life_duration_seconds),
 	m_start_energy(start_energy),
 	m_max_energy(max_energy),
-	m_supply_provided(supply_provided),
-	m_morphable_blueprints(morphable_blueprints) {
+	m_supply_provided(supply_provided) {
 }
 Blueprint::~Blueprint() {
 }
@@ -41,6 +39,9 @@ unsigned int Blueprint::get_vespene_gas_costs() const {
 const std::list<std::reference_wrapper<const Blueprint>>& Blueprint::get_dependency_blueprints() const {
 	return m_dependency_blueprints;
 }
+void Blueprint::add_dependency_blueprint(const Blueprint& blueprint) {
+	m_dependency_blueprints.push_back(blueprint);
+}
 unsigned int Blueprint::get_creation_duration_seconds() const {
 	return m_creation_duration_seconds;
 }
@@ -55,7 +56,4 @@ unsigned int Blueprint::get_max_energy() const {
 }
 unsigned int Blueprint::get_supply_provided() const {
 	return m_supply_provided;
-}
-const std::list<std::list<std::reference_wrapper<const Blueprint>>>& Blueprint::get_morphable_blueprints() const {
-	return m_morphable_blueprints;
 }

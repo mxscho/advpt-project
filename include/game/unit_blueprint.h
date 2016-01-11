@@ -2,6 +2,7 @@
 
 #include "game/blueprint.h"
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -25,11 +26,14 @@ public:
 		unsigned int vespene_gas_collection_rate,
 		bool is_builder);
 	
+	const std::list<std::list<std::reference_wrapper<const Blueprint>>>& get_morphable_blueprints() const;
+	void add_morphable_blueprints(const std::list<std::reference_wrapper<const Blueprint>>& blueprints);
 	unsigned int get_supply_costs() const;
 	unsigned int get_mineral_collection_rate() const;
 	unsigned int get_vespene_gas_collection_rate() const;
 	bool is_builder() const;
 private:
+	std::list<std::list<std::reference_wrapper<const Blueprint>>> m_morphable_blueprints;
 	unsigned int m_supply_costs;
 	unsigned int m_mineral_collection_rate;
 	unsigned int m_vespene_gas_collection_rate;

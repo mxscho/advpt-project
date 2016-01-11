@@ -15,13 +15,20 @@ UnitBlueprint::UnitBlueprint(const Race& race,
 	unsigned int mineral_collection_rate,
 	unsigned int vespene_gas_collection_rate,
 	bool is_builder)
-	: Blueprint(race, name, mineral_costs, vespene_gas_costs, dependency_blueprints, creation_duration_seconds, life_duration_seconds, start_energy, max_energy, supply_provided, morphable_blueprints),
+	: Blueprint(race, name, mineral_costs, vespene_gas_costs, dependency_blueprints, creation_duration_seconds, life_duration_seconds, start_energy, max_energy, supply_provided),
+	m_morphable_blueprints(morphable_blueprints),
 	m_supply_costs(supply_costs),
 	m_mineral_collection_rate(mineral_collection_rate),
 	m_vespene_gas_collection_rate(vespene_gas_collection_rate),
 	m_is_builder(is_builder) {
 }
 
+const std::list<std::list<std::reference_wrapper<const Blueprint>>>& UnitBlueprint::get_morphable_blueprints() const {
+	return m_morphable_blueprints;
+}
+void UnitBlueprint::add_morphable_blueprints(const std::list<std::reference_wrapper<const Blueprint>>& blueprints) {
+	m_morphable_blueprints.push_back(blueprints);
+}
 unsigned int UnitBlueprint::get_supply_costs() const {
 	return m_supply_costs;
 }
