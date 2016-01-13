@@ -30,6 +30,7 @@ Game::Game(unsigned int mineral_count, unsigned int vespene_gas_count)
 	m_current_building_constructions(),
 	m_building_blueprints(),
 	m_unit_blueprints(),
+	m_worker_unit_allocation({}, {}),
 	m_satisfied_dependencies(),
 	m_morphing_unit_productions(),
 	m_worker_unit_allocation_function(c_default_worker_allocation_function),
@@ -106,6 +107,9 @@ void Game::add_unit_by_name(const std::string& name) {
 	const UnitBlueprint& unit_blueprint = find_unit_blueprint_by_name(name);
 	m_units.emplace_back(new Unit(unit_blueprint));
 	satisfy_dependency(unit_blueprint);
+}
+const WorkerUnitAllocation& Game::get_worker_unit_allocation() const {
+	return m_worker_unit_allocation;
 }
 
 unsigned int Game::get_supply_available() const {
@@ -336,13 +340,13 @@ std::list<std::unique_ptr<Event>> Game::update(unsigned int elapsed_time_seconds
 
 	// Update resources (minerals, vespene gas and energy) and life durations.
 	auto worker_units = find_worker_units();
-	WorkerUnitAllocation worker_unit_allocation = m_worker_unit_allocation_function(worker_units);
-	auto& minearal_collecting_worker_units = worker_unit_allocation.get_mineral_collecting_worker_units();
+	m_worker_unit_allocation = m_worker_unit_allocation_function(worker_units);
+	auto& minearal_collecting_worker_units = m_worker_unit_allocation.get_mineral_collecting_worker_units();
 	for (auto i_minearal_collecting_worker_unit = minearal_collecting_worker_units.begin(); i_minearal_collecting_worker_unit != minearal_collecting_worker_units.end(); ++i_minearal_collecting_worker_unit) {
 		unsigned int collecting_duration_seconds = (*i_minearal_collecting_worker_unit)->is_immortal() || elapsed_time_seconds < (*i_minearal_collecting_worker_unit)->get_remaining_life_duration_seconds() ? elapsed_time_seconds : (*i_minearal_collecting_worker_unit)->get_remaining_life_duration_seconds();
 		m_raw_mineral_count += collecting_duration_seconds * (*i_minearal_collecting_worker_unit)->get_unit_blueprint().get_mineral_collection_rate();
 	}
-	auto& vespene_gas_collecting_worker_units = worker_unit_allocation.get_vespene_gas_collecting_worker_units();
+	auto& vespene_gas_collecting_worker_units = m_worker_unit_allocation.get_vespene_gas_collecting_worker_units();
 	for (auto i_vespene_gas_collecting_worker_unit = vespene_gas_collecting_worker_units.begin(); i_vespene_gas_collecting_worker_unit != vespene_gas_collecting_worker_units.end(); ++i_vespene_gas_collecting_worker_unit) {
 		unsigned int collecting_duration_seconds = (*i_vespene_gas_collecting_worker_unit)->is_immortal() || elapsed_time_seconds < (*i_vespene_gas_collecting_worker_unit)->get_remaining_life_duration_seconds() ? elapsed_time_seconds : (*i_vespene_gas_collecting_worker_unit)->get_remaining_life_duration_seconds();
 		m_raw_vespene_gas_count += collecting_duration_seconds * (*i_vespene_gas_collecting_worker_unit)->get_unit_blueprint().get_vespene_gas_collection_rate();
