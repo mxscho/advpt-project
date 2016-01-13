@@ -1,4 +1,4 @@
-﻿#pragma once 
+#pragma once 
 
 #include "game/building_construction.h"
 #include "game/updatable.h"
@@ -8,11 +8,11 @@ class Unit;
 
 class TerranBuildingConstruction : public BuildingConstruction {
 public:
-	TerranBuildingConstruction(const BuildingBlueprint& building_blueprint, const Unit& worker_unit);
+	TerranBuildingConstruction(const BuildingBlueprint& building_blueprint, Unit& builder_unit);
 
-	const Unit& get_worker_unit() const;
+	const Unit& get_builder_unit() const;
 
-	virtual void update(unsigned int elapsed_time_seconds) override;
+	virtual std::list<std::unique_ptr<Event>> update(unsigned int elapsed_time_seconds) override;
 private:
-	const Unit& m_worker_unit;
+	Unit& m_builder_unit;
 };

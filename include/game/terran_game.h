@@ -1,20 +1,22 @@
-﻿#pragma once 
+#pragma once 
 
 #include "game/game.h"
 #include "game/terran_building_construction.h"
 #include "game/updatable.h"
 
+#include <memory>
+
+class Event;
+
 class TerranGame : public Game {
 public:
-	TerranGame(unsigned int mineral_count,
-		unsigned int vespene_gas_count);
+	TerranGame(unsigned int mineral_count, unsigned int vespene_gas_count);
 
-	const std::list<TerranBuildingConstruction>& get_current_terran_building_constructions() const;
-
-	const TerranBuildingConstruction& construct_building(const BuildingBlueprint& building_blueprint);
+	virtual bool can_construct_buildings_by_names(const std::list<std::string>& names) const override;
 	void call_mule();
-
-	virtual void update(unsigned int elapsed_time_seconds) override;
+protected:
+	virtual std::list<std::shared_ptr<Unit>> find_worker_units() const override;
+	virtual std::unique_ptr<BuildingConstruction> create_building_construction(const BuildingBlueprint& building_blueprint) override;
 private:
-	std::list<TerranBuildingConstruction> m_current_terran_building_constructions;
+	std::list<std::shared_ptr<Unit>> find_builder_units() const;
 };

@@ -1,6 +1,10 @@
-﻿#include "debug.h"
+#include "debug.h"
 
 #include "game/building_blueprint.h"
+#include "game/events/unit_production_finish_event.h"
+#include "game/events/unit_production_start_event.h"
+#include "game/events/building_construction_finish_event.h"
+#include "game/events/building_construction_start_event.h"
 #include "game/terran_game.h"
 #include "game/unit_blueprint.h"
 #include "game/zerg_game.h"
@@ -88,8 +92,8 @@ void example() {
 		0, // Supply provided
 		{}, // Morphable blueprints
 		1, // Supply costs,
-		0, // Mineral collection rate
-		0, // Vespine gas collection rate
+		700, // Mineral collection rate
+		350, // Vespine gas collection rate
 		false)); // Is builder
 	// No we can add the drone to larva's morphables.
 	zerg_game.find_unit_blueprint_by_name("Larva").add_morphable_blueprints({ zerg_game.find_unit_blueprint_by_name("Drone") });
@@ -145,6 +149,49 @@ void example() {
 	zerg_game.produce_units_by_names({ "Zergling", "Zergling" });
 	// Can we morph another drone? (Obviously no because no minerals are left.)
 	std::cout << "Expected: false, Is: " << (zerg_game.can_produce_units_by_names({ "Drone" }) ? "true" : "false") << std::endl;
+
+	// Example: How to simulate game and get events.
+	for (unsigned int i = 0; i < 200; ++i) {
+		std::cout << "> " << i << " sec until " << (i + 1) << " sec -" <<
+			" Min: " << zerg_game.get_mineral_count() <<
+			" Gas: " << zerg_game.get_vespene_gas_count() <<
+			std::endl;
+		auto events = zerg_game.Game::update(1);
+		for (auto j = events.begin(); j != events.end(); ++j) {
+			if (UnitProductionStartEvent* unit_production_start_event = dynamic_cast<UnitProductionStartEvent*>(j->get())) {
+				std::shared_ptr<Unit> unit = unit_production_start_event->get_unit_production().get_unit();
+				std::cout << "EVENT: UnitProductionStartEvent -" <<
+					" ID: " << unit->get_id() <<
+					" Name: " << unit->get_unit_blueprint().get_name() <<
+					std::endl;
+			}
+			if (UnitProductionFinishEvent* unit_production_finish_event = dynamic_cast<UnitProductionFinishEvent*>(j->get())) {
+				std::shared_ptr<Unit> unit = unit_production_finish_event->get_unit_production().get_unit();
+				std::cout << "EVENT: UnitProductionFinishEvent -" <<
+					" ID: " << unit->get_id() <<
+					" Name: " << unit->get_unit_blueprint().get_name() <<
+					std::endl;
+			}
+			if (BuildingConstructionStartEvent* building_construction_start_event = dynamic_cast<BuildingConstructionStartEvent*>(j->get())) {
+				std::shared_ptr<Building> building = building_construction_start_event->get_building_construction().get_building();
+				std::cout << "EVENT: BuildingConstructionStartEvent -" <<
+					" ID: " << building->get_id() <<
+					" Name: " << building->get_building_blueprint().get_name() <<
+					std::endl;
+			}
+			if (BuildingConstructionFinishEvent* building_construction_finish_event = dynamic_cast<BuildingConstructionFinishEvent*>(j->get())) {
+				std::shared_ptr<Building> building = building_construction_finish_event->get_building_construction().get_building();
+				std::cout << "EVENT: BuildingConstructionFinishEvent -" <<
+					" ID: " << building->get_id() <<
+					" Name: " << building->get_building_blueprint().get_name() <<
+					std::endl;
+			}
+		}
+		// Let's build new hatcheries if we have 400 minerals.
+		if (zerg_game.get_mineral_count() > 400) {
+			zerg_game.construct_buildings_by_names({ "Hatchery" });
+		}
+	}
 }
 
 int main() {

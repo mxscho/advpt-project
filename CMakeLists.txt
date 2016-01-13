@@ -25,7 +25,10 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/building.h
 	${HEADER_DIRECTORY}/game/building_blueprint.h
 	${HEADER_DIRECTORY}/game/building_construction.h
+	${HEADER_DIRECTORY}/game/energetic.h
 	${HEADER_DIRECTORY}/game/game.h
+	${HEADER_DIRECTORY}/game/identifiable.h
+	${HEADER_DIRECTORY}/game/mortal.h
 	${HEADER_DIRECTORY}/game/protoss_game.h
 	${HEADER_DIRECTORY}/game/race.h
 	${HEADER_DIRECTORY}/game/terran_building_construction.h
@@ -36,6 +39,17 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/updatable.h
 	${HEADER_DIRECTORY}/game/worker_unit_allocation.h
 	${HEADER_DIRECTORY}/game/zerg_game.h
+	${HEADER_DIRECTORY}/game/events/building_construction_event.h
+	${HEADER_DIRECTORY}/game/events/building_construction_finish_event.h
+	${HEADER_DIRECTORY}/game/events/building_construction_start_event.h
+	${HEADER_DIRECTORY}/game/events/chronoboost_event.h
+	${HEADER_DIRECTORY}/game/events/event.h
+	${HEADER_DIRECTORY}/game/events/larva_injection_event.h
+	${HEADER_DIRECTORY}/game/events/mule_event.h
+	${HEADER_DIRECTORY}/game/events/special_ability_event.h
+	${HEADER_DIRECTORY}/game/events/unit_production_event.h
+	${HEADER_DIRECTORY}/game/events/unit_production_finish_event.h
+	${HEADER_DIRECTORY}/game/events/unit_production_start_event.h
 )
 set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/main.cpp
@@ -43,7 +57,10 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/building.cpp
 	${SOURCE_DIRECTORY}/game/building_blueprint.cpp
 	${SOURCE_DIRECTORY}/game/building_construction.cpp
+	${SOURCE_DIRECTORY}/game/energetic.cpp
 	${SOURCE_DIRECTORY}/game/game.cpp
+	${SOURCE_DIRECTORY}/game/identifiable.cpp
+	${SOURCE_DIRECTORY}/game/mortal.cpp
 	${SOURCE_DIRECTORY}/game/protoss_game.cpp
 	${SOURCE_DIRECTORY}/game/race.cpp
 	${SOURCE_DIRECTORY}/game/terran_building_construction.cpp
@@ -54,6 +71,17 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/updatable.cpp
 	${SOURCE_DIRECTORY}/game/worker_unit_allocation.cpp
 	${SOURCE_DIRECTORY}/game/zerg_game.cpp
+	${SOURCE_DIRECTORY}/game/events/building_construction_event.cpp
+	${SOURCE_DIRECTORY}/game/events/building_construction_finish_event.cpp
+	${SOURCE_DIRECTORY}/game/events/building_construction_start_event.cpp
+	${SOURCE_DIRECTORY}/game/events/chronoboost_event.cpp
+	${SOURCE_DIRECTORY}/game/events/event.cpp
+	${SOURCE_DIRECTORY}/game/events/larva_injection_event.cpp
+	${SOURCE_DIRECTORY}/game/events/mule_event.cpp
+	${SOURCE_DIRECTORY}/game/events/special_ability_event.cpp
+	${SOURCE_DIRECTORY}/game/events/unit_production_event.cpp
+	${SOURCE_DIRECTORY}/game/events/unit_production_finish_event.cpp
+	${SOURCE_DIRECTORY}/game/events/unit_production_start_event.cpp
 )
 
 # Add binary.

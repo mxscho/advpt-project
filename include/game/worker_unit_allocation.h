@@ -1,12 +1,18 @@
-﻿#pragma once 
+#pragma once 
+
+#include "game/unit.h"
+
+#include <list>
+#include <memory>
 
 class WorkerUnitAllocation {
 public:
-	WorkerUnitAllocation(unsigned int mineral_collecting_count, unsigned int vespene_gas_collecting_count);
+	WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>& mineral_collecting_worker_units,
+		const std::list<std::shared_ptr<Unit>>& vespene_gas_collecting_worker_units);
 
-	unsigned int get_mineral_collecting_count() const;
-	unsigned int get_vespene_gas_collecting_count() const;
+	const std::list<std::shared_ptr<Unit>>& get_mineral_collecting_worker_units() const;
+	const std::list<std::shared_ptr<Unit>>& get_vespene_gas_collecting_worker_units() const;
 private:
-	unsigned int m_mineral_collecting_count;
-	unsigned int m_vespene_gas_collecting_count;
+	std::list<std::shared_ptr<Unit>> m_mineral_collecting_worker_units;
+	std::list<std::shared_ptr<Unit>> m_vespene_gas_collecting_worker_units;
 };

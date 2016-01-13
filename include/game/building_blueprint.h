@@ -1,4 +1,4 @@
-﻿#pragma once 
+#pragma once 
 
 #include "game/blueprint.h"
 #include "game/unit_blueprint.h"

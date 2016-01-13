@@ -1,4 +1,4 @@
-﻿#include "game/building_blueprint.h"
+#include "game/building_blueprint.h"
 
 BuildingBlueprint::BuildingBlueprint(const Race& race,
 	const std::string& name,
