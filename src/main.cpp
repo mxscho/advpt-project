@@ -2522,6 +2522,8 @@ void example() {
 				std::cout << "EVENT: UnitProductionStartEvent -" <<
 					" ID: " << unit->get_id() <<
 					" Name: " << unit->get_unit_blueprint().get_name() <<
+					// The following nullptr check is important because morphing unit prodcution events don't know of a building!
+					" Producer: " << (unit_production_start_event->get_unit_production().get_building() ? unit_production_start_event->get_unit_production().get_building()->get_building_blueprint().get_name() : "n/a") <<
 					std::endl;
 			}
 			if (UnitProductionFinishEvent* unit_production_finish_event = dynamic_cast<UnitProductionFinishEvent*>(j->get())) {
@@ -2529,6 +2531,8 @@ void example() {
 				std::cout << "EVENT: UnitProductionFinishEvent -" <<
 					" ID: " << unit->get_id() <<
 					" Name: " << unit->get_unit_blueprint().get_name() <<
+					// The following nullptr check is important because morphing unit prodcution events don't know of a building!
+					" Producer: " << (unit_production_finish_event->get_unit_production().get_building() ? unit_production_finish_event->get_unit_production().get_building()->get_building_blueprint().get_name() : "n/a") <<
 					std::endl;
 			}
 			if (BuildingConstructionStartEvent* building_construction_start_event = dynamic_cast<BuildingConstructionStartEvent*>(j->get())) {

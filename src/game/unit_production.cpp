@@ -7,6 +7,18 @@ UnitProduction::UnitProduction(const UnitBlueprint& unit_blueprint)
 	: std::enable_shared_from_this<UnitProduction>(),
 	Updatable(),
 	m_unit_blueprint(unit_blueprint),
+	m_building(nullptr),
+	m_remaining_creation_duration_milliseconds(m_unit_blueprint.get_creation_duration_seconds() * 1000),
+	m_remaining_boost_duration_seconds(0),
+	m_is_finished(false),
+	m_unit(new Unit(m_unit_blueprint)),
+	m_boost_factor() {
+}
+UnitProduction::UnitProduction(const UnitBlueprint& unit_blueprint, const Building& building)
+	: std::enable_shared_from_this<UnitProduction>(),
+	Updatable(),
+	m_unit_blueprint(unit_blueprint),
+	m_building(&building),
 	m_remaining_creation_duration_milliseconds(m_unit_blueprint.get_creation_duration_seconds() * 1000),
 	m_remaining_boost_duration_seconds(0),
 	m_is_finished(false),
@@ -16,6 +28,9 @@ UnitProduction::UnitProduction(const UnitBlueprint& unit_blueprint)
 
 const UnitBlueprint& UnitProduction::get_unit_blueprint() const {
 	return m_unit_blueprint;
+}
+const Building* UnitProduction::get_building() const {
+	return m_building;
 }
 unsigned int UnitProduction::get_remaining_creation_duration_milliseconds() const {
 	return m_remaining_creation_duration_milliseconds;
