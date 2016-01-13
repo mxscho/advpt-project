@@ -7,6 +7,9 @@ set(SOURCE_DIRECTORY src)
 include_directories(${HEADER_DIRECTORY})
 include_directories(${SOURCE_DIRECTORY})
 
+find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
 set(CMAKE_BUILD_TYPE Debug)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
@@ -29,6 +32,7 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/game.h
 	${HEADER_DIRECTORY}/game/identifiable.h
 	${HEADER_DIRECTORY}/game/mortal.h
+	${HEADER_DIRECTORY}/game/output_formatter.h
 	${HEADER_DIRECTORY}/game/protoss_game.h
 	${HEADER_DIRECTORY}/game/race.h
 	${HEADER_DIRECTORY}/game/terran_building_construction.h
@@ -61,6 +65,7 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/game.cpp
 	${SOURCE_DIRECTORY}/game/identifiable.cpp
 	${SOURCE_DIRECTORY}/game/mortal.cpp
+	${SOURCE_DIRECTORY}/game/output_formatter.cpp
 	${SOURCE_DIRECTORY}/game/protoss_game.cpp
 	${SOURCE_DIRECTORY}/game/race.cpp
 	${SOURCE_DIRECTORY}/game/terran_building_construction.cpp
@@ -86,6 +91,8 @@ set(SOURCE_FILES
 
 # Add binary.
 add_executable(${EXECUTABLE} ${SOURCE_FILES} ${HEADER_FILES})
+
+target_link_libraries(${EXECUTABLE} ${Boost_LIBRARIES})
 
 # Add test binaries.
 # e.g. add_executable(test_something tests/something.cpp ${SOURCE_FILES} ${HEADER_FILES})
