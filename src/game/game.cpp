@@ -11,6 +11,7 @@
 #include <cassert>
 #include <exception>
 #include <utility>
+#include <iterator>
 
 const std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&)> Game::c_default_worker_allocation_function = [](const std::list<std::shared_ptr<Unit>>& worker_units) {
 	std::list<std::shared_ptr<Unit>> mineral_collecting_worker_units;
