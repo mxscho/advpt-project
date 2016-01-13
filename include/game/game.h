@@ -16,7 +16,7 @@ class Event;
 
 class Game : public Updatable {
 public:
-	static const std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&)> c_default_worker_allocation_function;
+	static const std::function<WorkerUnitAllocation(const Game&, const std::list<std::shared_ptr<Unit>>&)> c_default_worker_allocation_function;
 
 	Game(unsigned int mineral_count, unsigned int vespene_gas_count);
 	Game(Game& game) = delete;
@@ -24,12 +24,12 @@ public:
 	virtual ~Game() = 0;
 
 	const std::list<BuildingBlueprint>& get_building_blueprints() const;
-	const BuildingBlueprint& find_building_blueprint_by_name(const std::string& name) const;
-	BuildingBlueprint& find_building_blueprint_by_name(const std::string& name);
+	const BuildingBlueprint* find_building_blueprint_by_name(const std::string& name) const;
+	BuildingBlueprint* find_building_blueprint_by_name(const std::string& name);
 	void add_building_blueprint(const BuildingBlueprint& building_blueprint);
 	const std::list<UnitBlueprint>& get_unit_blueprints() const;
-	const UnitBlueprint& find_unit_blueprint_by_name(const std::string& name) const;
-	UnitBlueprint& find_unit_blueprint_by_name(const std::string& name);
+	const UnitBlueprint* find_unit_blueprint_by_name(const std::string& name) const;
+	UnitBlueprint* find_unit_blueprint_by_name(const std::string& name);
 	void add_unit_blueprint(const UnitBlueprint& unit_blueprint);
 	unsigned int get_mineral_count() const;
 	unsigned int get_vespene_gas_count() const;
@@ -43,7 +43,7 @@ public:
 	unsigned int get_supply_available() const;
 	unsigned int get_supply_used() const;
 	unsigned int get_remaining_supply() const;
-	void set_worker_unit_allocation_function(const std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&)>& worker_unit_allocation_function);
+	void set_worker_unit_allocation_function(const std::function<WorkerUnitAllocation(const Game&, const std::list<std::shared_ptr<Unit>>&)>& worker_unit_allocation_function);
 	virtual bool can_construct_buildings_by_names(const std::list<std::string>& names) const;
 	std::list<std::shared_ptr<const BuildingConstruction>> construct_buildings_by_names(const std::list<std::string>& names);
 	bool can_produce_units_by_names(const std::list<std::string>& names) const;
@@ -69,7 +69,7 @@ private:
 
 	std::list<std::reference_wrapper<const Blueprint>> m_satisfied_dependencies;
 	std::list<std::shared_ptr<UnitProduction>> m_morphing_unit_productions;
-	std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&)> m_worker_unit_allocation_function;
+	std::function<WorkerUnitAllocation(const Game&, const std::list<std::shared_ptr<Unit>>&)> m_worker_unit_allocation_function;
 	std::list<std::unique_ptr<Event>> m_collected_events;
 
 	const Building* find_building_for_unit_production(const UnitBlueprint& unit_blueprint) const;

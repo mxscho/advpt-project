@@ -43,7 +43,7 @@ bool Building::can_produce_unit(const UnitBlueprint& unit_blueprint) const {
 	}
 	return false;
 }
-std::shared_ptr<const UnitProduction> Building::produce_unit(const UnitBlueprint& unit_blueprint) {
+std::shared_ptr<UnitProduction> Building::produce_unit(const UnitBlueprint& unit_blueprint) {
 	assert(can_produce_unit(unit_blueprint));
 
 	m_current_unit_productions.emplace_back(new UnitProduction(unit_blueprint, *this));

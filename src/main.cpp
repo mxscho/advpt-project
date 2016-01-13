@@ -5,6 +5,7 @@
 #include "game/events/unit_production_start_event.h"
 #include "game/events/building_construction_finish_event.h"
 #include "game/events/building_construction_start_event.h"
+#include "game/output_formatter.h"
 #include "game/protoss_game.h"
 #include "game/terran_game.h"
 #include "game/unit_blueprint.h"
@@ -16,10 +17,6 @@
 using namespace std;
 
 std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* configfilename, char* techtreefilename) {
-	LOG_INFO("Default log temp.");
-	LOG_DEBUG("Debug log temp.");
-	LOG_ERROR("Error log temp.");
-
 	ifstream file;
 	char    line[1024];
 
@@ -95,7 +92,9 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 				{
 					file.getline(line, 1024);
 					std::string temp = line;
-
+					if (temp.length() < 1) {
+						continue;
+					}
 					if (temp.compare(1, 6, "Terran") == 0)
 					{
 						file.getline(line, 1024); //### zeile überspringen
@@ -209,7 +208,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -218,7 +217,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp)->add_producible_unit_blueprint(*game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -227,13 +226,10 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										try
-										{
-											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
-										}
-										catch (const std::out_of_range)
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
+										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
+											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 
 									}
@@ -367,7 +363,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -386,14 +382,10 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
 
-										try
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
-										}
-										catch (const std::out_of_range)
-										{
-
-											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
+										if (BuildingBlueprint* building_blueprint = game_setup->find_building_blueprint_by_name(dumtemp)) {
+											building_blueprint->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_unit_blueprint_by_name(dumtemp)->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -432,10 +424,6 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 }
 
 std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* configfilename, char* techtreefilename) {
-	LOG_INFO("Default log temp.");
-	LOG_DEBUG("Debug log temp.");
-	LOG_ERROR("Error log temp.");
-
 	ifstream file;
 	char    line[1024];
 
@@ -455,6 +443,9 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 			// Die Datei zeilenweise auslesen
 			file.getline(line, 1024);
 			std::string temp = line;
+			if (temp.length() < 2) {
+				continue;
+			}
 			if (temp.compare(2, 7, "General") == 0)
 			{
 				file.getline(line, 1024); // ### Zeile einlesen
@@ -509,7 +500,9 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 				{
 					file.getline(line, 1024);
 					std::string temp = line;
-
+					if (temp.length() < 1) {
+						continue;
+					}
 					if (temp.compare(1, 7, "Protoss") == 0)
 					{
 						file.getline(line, 1024); //### zeile überspringen
@@ -623,7 +616,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -632,7 +625,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp)->add_producible_unit_blueprint(*game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -641,13 +634,10 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										try
-										{
-											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
-										}
-										catch (const std::out_of_range)
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
+										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
+											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -758,7 +748,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -776,13 +766,10 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										try
-										{
-											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
-										}
-										catch (const std::out_of_range)
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
+										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
+											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -818,10 +805,6 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 }
 
 std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfilename, char* techtreefilename) {
-	LOG_INFO("Default log temp.");
-	LOG_DEBUG("Debug log temp.");
-	LOG_ERROR("Error log temp.");
-
 	ifstream file;
 	char    line[1024];
 
@@ -846,6 +829,9 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 			// Die Datei zeilenweise auslesen
 			file.getline(line, 1024);
 			std::string temp = line;
+			if (temp.length() < 2) {
+				continue;
+			}
 			if (temp.compare(2, 7, "General") == 0)
 			{
 				file.getline(line, 1024); // ### Zeile einlesen
@@ -911,6 +897,9 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 					file.getline(line, 1024);
 					std::string temp = line;
 
+					if (temp.length() < 1) {
+						continue;
+					}
 					if (temp.compare(1, 4, "Zerg") == 0)
 					{
 						file.getline(line, 1024); //### zeile überspringen
@@ -1024,7 +1013,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -1033,7 +1022,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp)->add_producible_unit_blueprint(*game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -1042,22 +1031,16 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										try
-										{
-											if (morphtemp == 1)
-											{
 
-												game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
+										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
+											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+											if (morphtemp == 1) {
+												unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+											} else {
+												unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp), *game_setup->find_unit_blueprint_by_name(nametemp) });
 											}
-											else
-											{
-												game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp),  game_setup->find_unit_blueprint_by_name(nametemp) });
-
-											}
-										}
-										catch (const std::out_of_range)
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -1168,7 +1151,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp)->add_dependency_blueprint(*game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -1186,13 +1169,10 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										try
-										{
-											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_building_blueprint_by_name(nametemp) });
-										}
-										catch (const std::out_of_range)
-										{
-											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
+										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
+											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
+										} else {
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -1270,7 +1250,7 @@ void example() {
 		200, // Max energy
 		9, // Supply provided
 		{}, // Morphable blueprints
-		{ terran_game.find_unit_blueprint_by_name("SCV") /* We add the SCV here already. */ }, // Producible unit blueprints
+		{ *terran_game.find_unit_blueprint_by_name("SCV") /* We add the SCV here already. */ }, // Producible unit blueprints
 		1)); // Max concurrent unit production count
 
 	terran_game.add_building_by_name("Command Center");
@@ -1321,7 +1301,7 @@ void example() {
 		350, // Vespine gas collection rate
 		false)); // Is builder
 				 // No we can add the drone to larva's morphables.
-	zerg_game.find_unit_blueprint_by_name("Larva").add_morphable_blueprints({ zerg_game.find_unit_blueprint_by_name("Drone") });
+	zerg_game.find_unit_blueprint_by_name("Larva")->add_morphable_blueprints({ *zerg_game.find_unit_blueprint_by_name("Drone") });
 	zerg_game.add_unit_blueprint(UnitBlueprint(
 		Race::Zerg, // Race
 		"Zergling", // Name
@@ -1339,7 +1319,7 @@ void example() {
 		0, // Vespine gas collection rate
 		false)); // Is builder
 				 // No we can add the drone to larva's morphables.
-	zerg_game.find_unit_blueprint_by_name("Larva").add_morphable_blueprints({
+	zerg_game.find_unit_blueprint_by_name("Larva")->add_morphable_blueprints({
 		zerg_game.find_unit_blueprint_by_name("Zergling"),
 		zerg_game.find_unit_blueprint_by_name("Zergling")
 	});
@@ -1423,7 +1403,7 @@ void example() {
 	}
 }
 
-void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
+void forwardSimulator(const string& race, Game& game, const std::string& buildlistpath)
 {
 	std::list<std::string> buildlist; //Die eingelesene Liste mit den Aufträgen
 	ifstream file;
@@ -1445,7 +1425,67 @@ void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
 		LOG_ERROR("Error couldn't read Buildlist");
 		return;
 	}
-	//TODO: Hier die ForwardSimulator Routine rein
+	buildlist.remove_if([](const string& buildlist_entry) { return buildlist_entry == ""; });
+	OutputFormatter output_formatter(race);
+	unsigned int time = 0;
+	game.set_worker_unit_allocation_function([](const Game& game, const std::list<std::shared_ptr<Unit>>& worker_units) {
+		// TODO: Improve.
+		std::list<std::shared_ptr<Unit>> collecting_worker_units;
+		std::copy_if(worker_units.begin(), worker_units.end(), std::back_inserter(collecting_worker_units), [](const std::shared_ptr<Unit>& worker_unit) {
+			return worker_unit->get_unit_blueprint().get_mineral_collection_rate() != 0 && worker_unit->get_unit_blueprint().get_vespene_gas_collection_rate() != 0;
+		});
+		std::list<std::shared_ptr<Unit>> actual_collecting_worker_units;
+		for (auto i_unit = game.get_units().begin(); i_unit != game.get_units().end(); ++i_unit) {
+			if ((*i_unit)->get_unit_blueprint().get_name() == "refinery" ||
+				(*i_unit)->get_unit_blueprint().get_name() == "assimilator" ||
+				(*i_unit)->get_unit_blueprint().get_name() == "extractor") {
+				if (collecting_worker_units.size() > 1) {
+					std::shared_ptr<Unit> unit = collecting_worker_units.front();
+					collecting_worker_units.pop_front();
+					actual_collecting_worker_units.push_back(unit);
+				}
+			}
+		}
+		return WorkerUnitAllocation(collecting_worker_units, actual_collecting_worker_units);
+	});
+	game.update(0);
+	for (auto i = buildlist.begin(); i != buildlist.end(); ++i) {
+		std::list<std::string> names = { *i };
+		bool building = game.can_construct_buildings_by_names(names);
+		bool unit = game.can_produce_units_by_names(names);
+		while (time <= 1000 && !building && !unit) {
+			std::list<std::unique_ptr<Event>> events = game.update(1);
+			++time;
+			if (events.size() > 0) {
+				output_formatter.add_event(time, game, events);
+			}
+			building = game.can_construct_buildings_by_names(names);
+			unit = game.can_produce_units_by_names(names);
+		}
+		if (time > 1000) {
+			break;
+		} else {
+			if (building) {
+				game.construct_buildings_by_names(names);
+			} else if (unit) {
+				game.produce_units_by_names(names);
+			}
+		}
+	}
+	if (time <= 1000) {
+		output_formatter.set_validity(true);
+		// TODO: This needs improvement.
+		// Just simulate another 200 seconds to get all finished events.
+		for (unsigned int i = 0; i < 200; ++i) {
+			std::list<std::unique_ptr<Event>> events = game.update(1);
+			if (events.size() > 0) {
+				output_formatter.add_event(time, game, events);
+			}
+		}
+	} else {
+		output_formatter.set_validity(false);
+	}
+	output_formatter.print();
 }
 int main(int argc, char** argv) {
 	// BspParameter : ../config.csv ../techtrees.csv sc2-hots-terran ../terran1.txt
@@ -1455,17 +1495,17 @@ int main(int argc, char** argv) {
 
 		if (race.compare("sc2-hots-terran") == 0) {
 			std::unique_ptr<TerranGame> terran_game = Terraninitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(*terran_game, argv[4]);
+			forwardSimulator(race, *terran_game, argv[4]);
 		}
 		else if (race.compare("sc2-hots-protoss") == 0)
 		{
 			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(*protoss_game, argv[4]);
+			forwardSimulator(race, *protoss_game, argv[4]);
 		}
 		else if (race.compare("sc2-hots-zerg") == 0)
 		{
 			std::unique_ptr<ZergGame> zerg_game = Zerginitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(*zerg_game, argv[4]);
+			forwardSimulator(race, *zerg_game, argv[4]);
 		}
 		else
 		{

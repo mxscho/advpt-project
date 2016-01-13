@@ -22,7 +22,7 @@ public:
 
 	bool can_morph(const BuildingBlueprint& building_blueprint) const;
 	bool can_produce_unit(const UnitBlueprint& unit_blueprint) const;
-	std::shared_ptr<const UnitProduction> produce_unit(const UnitBlueprint& unit_blueprint);
+	std::shared_ptr<UnitProduction> produce_unit(const UnitBlueprint& unit_blueprint);
 
 	virtual std::list<std::unique_ptr<Event>> update(unsigned int elapsed_time_seconds) override;
 private:

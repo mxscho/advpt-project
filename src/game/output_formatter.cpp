@@ -14,10 +14,7 @@ OutputFormatter::OutputFormatter(std::string game) {
 	output.put("buildListValid", "1");
 }
 
-OutputFormatter::~OutputFormatter() {
-}
-
-void OutputFormatter::add_event(unsigned int time, Game& game, std::list<std::unique_ptr<Event>> events) {
+void OutputFormatter::add_event(unsigned int time, Game& game, const std::list<std::unique_ptr<Event>>& events) {
 	ptree message;
 	message.put("time", time);
 
@@ -29,13 +26,13 @@ void OutputFormatter::add_event(unsigned int time, Game& game, std::list<std::un
 	resources.put("supply-used", game.get_supply_used());
 
 	ptree workers;
-	resources.put("minerals", game.get_worker_unit_allocation().get_mineral_collecting_worker_units().size());
-	resources.put("vespene", game.get_worker_unit_allocation().get_vespene_gas_collecting_worker_units().size());
+	workers.put("minerals", game.get_worker_unit_allocation().get_mineral_collecting_worker_units().size());
+	workers.put("vespene", game.get_worker_unit_allocation().get_vespene_gas_collecting_worker_units().size());
 
 	status.add_child("resources", resources);
 	status.add_child("workers", workers);
 	message.add_child("status", status);
-	
+
 	ptree event_array;
 	for (auto event = events.begin(); event != events.end(); ++event) {
 		ptree entry;
