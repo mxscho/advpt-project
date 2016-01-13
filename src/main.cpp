@@ -5,23 +5,17 @@
 #include "game/events/unit_production_start_event.h"
 #include "game/events/building_construction_finish_event.h"
 #include "game/events/building_construction_start_event.h"
-#include "game/terran_game.h"
 #include "game/protoss_game.h"
+#include "game/terran_game.h"
 #include "game/unit_blueprint.h"
-
 #include "game/zerg_game.h"
-
 
 #include <iostream>
 #include <fstream>
+
 using namespace std;
 
-
-
-
-
-
-TerranGame Terraninitialize(const std::string& race) {
+std::unique_ptr<TerranGame> Terraninitialize(const std::string& race) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
@@ -48,6 +42,9 @@ TerranGame Terraninitialize(const std::string& race) {
 			// Die Datei zeilenweise auslesen
 			file.getline(line, 1024);
 			std::string temp = line;
+			if (temp.length() < 2) {
+				continue;
+			}
 			if (temp.compare(2, 7, "General") == 0)
 			{
 				file.getline(line, 1024); // ### Zeile einlesen
@@ -86,7 +83,7 @@ TerranGame Terraninitialize(const std::string& race) {
 
 	}
 	//Terran game erstellen
-	TerranGame game_setup(mineral_count, vespene_gas_count);
+	std::unique_ptr<TerranGame> game_setup(new TerranGame(mineral_count, vespene_gas_count));
 	//Einlesen der Techtrees
 	if (race.compare("sc2-hots-terran") == 0)
 	{
@@ -170,7 +167,7 @@ TerranGame Terraninitialize(const std::string& race) {
 
 
 
-								game_setup.add_unit_blueprint(UnitBlueprint(
+								game_setup->add_unit_blueprint(UnitBlueprint(
 									Race::Terran, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -214,7 +211,7 @@ TerranGame Terraninitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -223,7 +220,7 @@ TerranGame Terraninitialize(const std::string& race) {
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -234,11 +231,11 @@ TerranGame Terraninitialize(const std::string& race) {
 										postemp += dumtemp.length() + 1;
 										try
 										{
-											game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp) });
+											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
 										}
 										catch (const std::out_of_range)
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 
 									}
@@ -253,7 +250,7 @@ TerranGame Terraninitialize(const std::string& race) {
 						if (runs == 0)
 						{
 							/////////////////////////////Special Terran MULE Beginn
-							game_setup.add_unit_blueprint(UnitBlueprint(
+							game_setup->add_unit_blueprint(UnitBlueprint(
 								Race::Terran, // Race
 								"Mule", // Name
 								0, // Mineral costs
@@ -331,7 +328,7 @@ TerranGame Terraninitialize(const std::string& race) {
 								dummytemp.clear();
 								unsigned int lifedurtemp = 0;
 
-								game_setup.add_building_blueprint(BuildingBlueprint(
+								game_setup->add_building_blueprint(BuildingBlueprint(
 									Race::Terran, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -372,7 +369,7 @@ TerranGame Terraninitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -381,7 +378,7 @@ TerranGame Terraninitialize(const std::string& race) {
 									//	{
 									//std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 									//	postemp += dumtemp.length() + 1;
-									//game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+									//game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									//}
 								}
 								else
@@ -393,12 +390,12 @@ TerranGame Terraninitialize(const std::string& race) {
 
 										try
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 										catch (const std::out_of_range)
 										{
 
-											game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp) });
+											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -417,11 +414,11 @@ TerranGame Terraninitialize(const std::string& race) {
 		}
 		for (unsigned int i = 0;i<worker;i++)
 		{
-			game_setup.add_unit_by_name("scv");
+			game_setup->add_unit_by_name("scv");
 		}
 		for (unsigned int a = 0;a < basebuilding;a++)
 		{
-			game_setup.add_building_by_name("command_center");
+			game_setup->add_building_by_name("command_center");
 		}
 		
 	}
@@ -436,7 +433,7 @@ TerranGame Terraninitialize(const std::string& race) {
 
 }
 
-ProtossGame Protossinitialize(const std::string& race) {
+std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
@@ -501,7 +498,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 		LOG_ERROR("Config-File not found");
 
 	}
-	ProtossGame game_setup(mineral_count, vespene_gas_count); //Protoss game erstellen
+	std::unique_ptr<ProtossGame> game_setup(new ProtossGame(mineral_count, vespene_gas_count)); //Protoss game erstellen
 	//Einlesen der Techtrees
 	
 	if (race.compare("sc2-hots-protoss") == 0)
@@ -586,7 +583,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 
 
 
-								game_setup.add_unit_blueprint(UnitBlueprint(
+								game_setup->add_unit_blueprint(UnitBlueprint(
 									Race::Protoss, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -630,7 +627,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -639,7 +636,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -650,11 +647,11 @@ ProtossGame Protossinitialize(const std::string& race) {
 										postemp += dumtemp.length() + 1;
 										try
 										{
-											game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp) });
+											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
 										}
 										catch (const std::out_of_range)
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -724,7 +721,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 								dummytemp.clear();
 								unsigned int lifedurtemp = 0;
 
-								game_setup.add_building_blueprint(BuildingBlueprint(
+								game_setup->add_building_blueprint(BuildingBlueprint(
 									Race::Protoss, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -765,7 +762,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -774,7 +771,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 									//	{
 									//std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 									//	postemp += dumtemp.length() + 1;
-									//game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+									//game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									//}
 								}
 								else
@@ -785,11 +782,11 @@ ProtossGame Protossinitialize(const std::string& race) {
 										postemp += dumtemp.length() + 1;
 										try
 										{
-											game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp) });
+											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
 										}
 										catch (const std::out_of_range)
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -808,11 +805,11 @@ ProtossGame Protossinitialize(const std::string& race) {
 		}
 		for (unsigned int i = 0;i<worker;i++)
 		{
-			game_setup.add_unit_by_name("probe");
+			game_setup->add_unit_by_name("probe");
 		}
 		for (unsigned int a = 0;a < basebuilding;a++)
 		{
-			game_setup.add_building_by_name("nexus");
+			game_setup->add_building_by_name("nexus");
 		}
 		
 	}
@@ -824,7 +821,7 @@ ProtossGame Protossinitialize(const std::string& race) {
 	return game_setup;
 }
 
-ZergGame Zerginitialize(const std::string& race) {
+std::unique_ptr<ZergGame> Zerginitialize(const std::string& race) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
@@ -905,7 +902,7 @@ ZergGame Zerginitialize(const std::string& race) {
 		LOG_ERROR("Config-File not found");
 
 	}
-	ZergGame game_setup(mineral_count, vespene_gas_count); //Zerg game erstellen
+	std::unique_ptr<ZergGame> game_setup(new ZergGame(mineral_count, vespene_gas_count)); //Zerg game erstellen
 	//Einlesen der Techtrees	
 	if (race.compare("sc2-hots-zerg") == 0)
 	{
@@ -989,7 +986,7 @@ ZergGame Zerginitialize(const std::string& race) {
 
 
 
-								game_setup.add_unit_blueprint(UnitBlueprint(
+								game_setup->add_unit_blueprint(UnitBlueprint(
 									Race::Zerg, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -1033,7 +1030,7 @@ ZergGame Zerginitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_unit_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -1042,7 +1039,7 @@ ZergGame Zerginitialize(const std::string& race) {
 									{
 										std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 										postemp += dumtemp.length() + 1;
-										game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+										game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									}
 								}
 								else
@@ -1056,17 +1053,17 @@ ZergGame Zerginitialize(const std::string& race) {
 											if (morphtemp == 1)
 											{
 
-												game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp) });
+												game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp) });
 											}
 											else
 											{
-												game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_unit_blueprint_by_name(nametemp),  game_setup.find_unit_blueprint_by_name(nametemp) });
+												game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_unit_blueprint_by_name(nametemp),  game_setup->find_unit_blueprint_by_name(nametemp) });
 
 											}
 										}
 										catch (const std::out_of_range)
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -1136,7 +1133,7 @@ ZergGame Zerginitialize(const std::string& race) {
 								dummytemp.clear();
 								unsigned int lifedurtemp = 0;
 
-								game_setup.add_building_blueprint(BuildingBlueprint(
+								game_setup->add_building_blueprint(BuildingBlueprint(
 									Race::Zerg, // Race
 									nametemp, // Name
 									mineraltemp, // Mineral costs
@@ -1177,7 +1174,7 @@ ZergGame Zerginitialize(const std::string& race) {
 								{
 									std::string  dumtemp = dependtemp.substr(postemp, dependtemp.find("/", postemp + 1) - postemp);
 									postemp += dumtemp.length() + 1;
-									game_setup.find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup.find_building_blueprint_by_name(dumtemp));
+									game_setup->find_building_blueprint_by_name(nametemp).add_dependency_blueprint(game_setup->find_building_blueprint_by_name(dumtemp));
 								}
 								postemp = 0;
 								if (morphtemp == 0)
@@ -1186,7 +1183,7 @@ ZergGame Zerginitialize(const std::string& race) {
 									//	{
 									//std::string  dumtemp = prodbytemp.substr(postemp, prodbytemp.find("/", postemp + 1) - postemp);
 									//	postemp += dumtemp.length() + 1;
-									//game_setup.find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup.find_unit_blueprint_by_name(nametemp));
+									//game_setup->find_building_blueprint_by_name(dumtemp).add_producible_unit_blueprint(game_setup->find_unit_blueprint_by_name(nametemp));
 									//}
 								}
 								else
@@ -1197,11 +1194,11 @@ ZergGame Zerginitialize(const std::string& race) {
 										postemp += dumtemp.length() + 1;
 										try
 										{
-											game_setup.find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_unit_blueprint_by_name(dumtemp).add_morphable_blueprints({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 										catch (const std::out_of_range)
 										{
-											game_setup.find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup.find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp).add_morphable_building_blueprint({ game_setup->find_building_blueprint_by_name(nametemp) });
 										}
 									}
 								}
@@ -1220,19 +1217,19 @@ ZergGame Zerginitialize(const std::string& race) {
 		}
 		for (unsigned int i = 0;i<worker;i++)
 		{
-			game_setup.add_unit_by_name("drone");
+			game_setup->add_unit_by_name("drone");
 		}
 		for (unsigned int a = 0;a < basebuilding;a++)
 		{
-			game_setup.add_building_by_name("hatchery");
+			game_setup->add_building_by_name("hatchery");
 		}
 		for (unsigned int b = 0;b < overlord;b++)
 		{
-			game_setup.add_unit_by_name("overlord");
+			game_setup->add_unit_by_name("overlord");
 		}
 		for (unsigned int c = 0;c < larvae;c++)
 		{
-			game_setup.add_unit_by_name("larva");
+			game_setup->add_unit_by_name("larva");
 		}
 		
 	}
@@ -1250,8 +1247,8 @@ void example() {
 	LOG_DEBUG("Debug log test.");
 	LOG_ERROR("Error log test.");
 
-	TerranGame game_setup(50, 0);
-	game_setup.add_unit_blueprint(UnitBlueprint(
+	TerranGame terran_game(50, 0);
+	terran_game.add_unit_blueprint(UnitBlueprint(
 		Race::Terran, // Race
 		"SCV", // Name
 		50, // Mineral costs
@@ -1267,7 +1264,7 @@ void example() {
 		0, // Mineral collection rate
 		0, // Vespine gas collection rate
 		true)); // Is builder
-	game_setup.add_building_blueprint(BuildingBlueprint(
+	terran_game.add_building_blueprint(BuildingBlueprint(
 		Race::Terran, // Race
 		"Command Center", // Name
 		400, // Mineral costs
@@ -1279,22 +1276,22 @@ void example() {
 		200, // Max energy
 		9, // Supply provided
 		{}, // Morphable blueprints
-		{ game_setup.find_unit_blueprint_by_name("SCV") /* We add the SCV here already. */ }, // Producible unit blueprints
+		{ terran_game.find_unit_blueprint_by_name("SCV") /* We add the SCV here already. */ }, // Producible unit blueprints
 		1)); // Max concurrent unit production count
 
-	game_setup.add_building_by_name("Command Center");
-	game_setup.add_unit_by_name("SCV");
-	game_setup.add_unit_by_name("SCV");
-	game_setup.add_unit_by_name("SCV");
-	game_setup.add_unit_by_name("SCV");
-	game_setup.add_unit_by_name("SCV");
-	game_setup.add_unit_by_name("SCV");
+	terran_game.add_building_by_name("Command Center");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
+	terran_game.add_unit_by_name("SCV");
 
 	// Can we produce a SCV?
-	std::cout << "Expected: true, Is: " << (game_setup.can_produce_units_by_names({ "SCV" }) ? "true" : "false") << std::endl;
-	game_setup.produce_units_by_names({ "SCV" });
+	std::cout << "Expected: true, Is: " << (terran_game.can_produce_units_by_names({ "SCV" }) ? "true" : "false") << std::endl;
+	terran_game.produce_units_by_names({ "SCV" });
 	// Can we produce another one? (Obviously no because no minerals are left and all buildings are occupied.)
-	std::cout << "Expected: false, Is: " << (game_setup.can_produce_units_by_names({ "SCV" }) ? "true" : "false") << std::endl;
+	std::cout << "Expected: false, Is: " << (terran_game.can_produce_units_by_names({ "SCV" }) ? "true" : "false") << std::endl;
 
 	ZergGame zerg_game(50, 0);
 	zerg_game.add_unit_blueprint(UnitBlueprint(
@@ -1455,25 +1452,27 @@ void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
 		return;
 	}
 	//TODO: Hier die ForwardSimulator Routine rein
-	
 }
-int main(int argn, char *argv[]) {
+int main(int argc, char** argv) {
 	// BspParameter : sc2-hots-terran ../terran1.txt
-	if (argn == 3)
+	if (argc == 3)
 	{
 		const std::string& race = argv[1];
 
 		if (race.compare("sc2-hots-terran") == 0)
 		{
-			forwardSimulator(Terraninitialize(argv[1]), argv[2]);
+			std::unique_ptr<TerranGame> terran_game = Terraninitialize(argv[1]);
+			forwardSimulator(*terran_game, argv[2]);
 		}
 		else if (race.compare("sc2-hots-protoss") == 0)
 		{
-			forwardSimulator(Protossinitialize(argv[1]), argv[2]);
+			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize(argv[1]);
+			forwardSimulator(*protoss_game, argv[2]);
 		}
 		else if (race.compare("sc2-hots-zerg") == 0)
 		{
-			forwardSimulator(Zerginitialize(argv[1]), argv[2]);
+			std::unique_ptr<ZergGame> zerg_game = Zerginitialize(argv[1]);
+			forwardSimulator(*zerg_game, argv[2]);
 		}
 		else
 		{
@@ -1485,13 +1484,5 @@ int main(int argn, char *argv[]) {
 		LOG_ERROR("Wrong Number of Parameters");
 	}
 
-	example();
-
+	// example();
 }
-
-/*
-int main() {
-    // TODO: Remove this main(...) if broken code has been fixed.
-    example();
-}
-*/

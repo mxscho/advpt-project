@@ -18,8 +18,9 @@ class Game : public Updatable {
 public:
 	static const std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&)> c_default_worker_allocation_function;
 
-	Game(unsigned int mineral_count,
-		unsigned int vespene_gas_count);
+	Game(unsigned int mineral_count, unsigned int vespene_gas_count);
+	Game(Game& game) = delete;
+	Game& operator=(Game& game) = delete;
 	virtual ~Game() = 0;
 
 	const std::list<BuildingBlueprint>& get_building_blueprints() const;

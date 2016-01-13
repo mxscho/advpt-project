@@ -20,13 +20,13 @@ const std::function<WorkerUnitAllocation(const std::list<std::shared_ptr<Unit>>&
 	return WorkerUnitAllocation(mineral_collecting_worker_units, {});
 };
 
-Game::Game(unsigned int mineral_count,
-	unsigned int vespene_gas_count)
+Game::Game(unsigned int mineral_count, unsigned int vespene_gas_count)
 	: Updatable(),
 	m_buildings(),
 	m_units(),
 	m_raw_mineral_count(mineral_count * 1000),
 	m_raw_vespene_gas_count(vespene_gas_count * 1000),
+	m_current_building_constructions(),
 	m_building_blueprints(),
 	m_unit_blueprints(),
 	m_satisfied_dependencies(),
