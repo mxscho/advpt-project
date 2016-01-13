@@ -1,5 +1,6 @@
 #include "game/output_formatter.h"
 
+#include "game/building_construction.h"
 #include "game/events/building_construction_start_event.h"
 #include "game/events/building_construction_finish_event.h"
 #include "game/events/unit_production_start_event.h"
@@ -28,8 +29,8 @@ void OutputFormatter::add_event(unsigned int time, Game& game, std::list<std::un
 	resources.put("supply-used", game.get_supply_used());
 
 	ptree workers;
-	resources.put("minerals", game.get_worker_unit_allocation().get_mineral_collecting_worker_units());
-	resources.put("vespene", game.get_worker_unit_allocation().get_vespene_gas_collecting_worker_units());
+	resources.put("minerals", game.get_worker_unit_allocation().get_mineral_collecting_worker_units().size());
+	resources.put("vespene", game.get_worker_unit_allocation().get_vespene_gas_collecting_worker_units().size());
 
 	status.add_child("resources", resources);
 	status.add_child("workers", workers);
