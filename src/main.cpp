@@ -7,7 +7,7 @@
 
 #include "game/zerg_game.h"
 
-
+/* BROKEN CODE
 
 #include <iostream>
 #include <fstream>
@@ -1272,6 +1272,7 @@ ZergGame Zerginitialize(const std::string& race) {
 
 
 }
+BROKEN CODE */
 /*
 void initialize(const std::string& race) {
 	LOG_INFO("Default log temp.");
@@ -2505,7 +2506,7 @@ void example() {
 	std::cout << "Expected: false, Is: " << (zerg_game.can_produce_units_by_names({ "Drone" }) ? "true" : "false") << std::endl;
 }
 
-
+/* BROKEN CODE
 void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
 {
 	std::list<std::string> buildlist; //Die eingelesene Liste mit den Aufträgen
@@ -2531,7 +2532,6 @@ void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
 	//TODO: Hier die ForwardSimulator Routine rein
 }
 int main(int argn, char *argv[]) {
-	
 
 	const std::string& race = argv[1];
 
@@ -2551,3 +2551,10 @@ int main(int argn, char *argv[]) {
 	//example();
 
 }
+BROKEN CODE */
+
+int main() {
+    // TODO: Remove this main(...) if broken code has been fixed.
+    example();
+}
+
