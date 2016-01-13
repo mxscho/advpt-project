@@ -1,4 +1,4 @@
-﻿#include "game/game.h"
+#include "game/game.h"
 
 #include "game/worker_unit_allocation.h"
 

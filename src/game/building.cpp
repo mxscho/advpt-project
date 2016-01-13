@@ -1,4 +1,4 @@
-﻿#include "game/building.h"
+#include "game/building.h"
 
 #include "game/building_blueprint.h"
 

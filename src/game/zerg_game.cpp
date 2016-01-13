@@ -1,4 +1,4 @@
-﻿#include "game/zerg_game.h"
+#include "game/zerg_game.h"
 
 ZergGame::ZergGame(unsigned int mineral_count,
 	unsigned int vespene_gas_count)

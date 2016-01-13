@@ -1,4 +1,4 @@
-﻿#include "game/terran_game.h"
+#include "game/terran_game.h"
 
 TerranGame::TerranGame(unsigned int mineral_count,
 	unsigned int vespene_gas_count)

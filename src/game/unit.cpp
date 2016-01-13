@@ -1,4 +1,4 @@
-﻿#include "game/unit.h"
+#include "game/unit.h"
 
 #include "game/unit_blueprint.h"
 

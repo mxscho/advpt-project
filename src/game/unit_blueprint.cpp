@@ -1,4 +1,4 @@
-﻿#include "game/unit_blueprint.h"
+#include "game/unit_blueprint.h"
 
 UnitBlueprint::UnitBlueprint(const Race& race,
 	const std::string& name,

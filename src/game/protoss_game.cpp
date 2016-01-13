@@ -1,4 +1,4 @@
-﻿#include "game/protoss_game.h"
+#include "game/protoss_game.h"
 
 ProtossGame::ProtossGame(unsigned int mineral_count,
 	unsigned int vespene_gas_count)

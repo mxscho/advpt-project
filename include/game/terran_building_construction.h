@@ -1,4 +1,4 @@
-﻿#pragma once 
+#pragma once 
 
 #include "game/building_construction.h"
 #include "game/updatable.h"
