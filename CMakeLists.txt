@@ -9,7 +9,7 @@ include_directories(${SOURCE_DIRECTORY})
 
 set(CMAKE_BUILD_TYPE Debug)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11")
+	set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "/TP /W3 /WX /EHsc")
