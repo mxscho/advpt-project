@@ -15,13 +15,11 @@
 
 using namespace std;
 
-std::unique_ptr<TerranGame> Terraninitialize(const std::string& race) {
+std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* configfilename, char* techtreefilename) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
 
-	char     configfilename[128] = "../config.csv";
-	char     techtreefilename[128] = "../techtrees.csv";
 	ifstream file;
 	char    line[1024];
 
@@ -433,13 +431,11 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race) {
 
 }
 
-std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race) {
+std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* configfilename, char* techtreefilename) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
 
-	char     configfilename[128] = "../config.csv";
-	char     techtreefilename[128] = "../techtrees.csv";
 	ifstream file;
 	char    line[1024];
 
@@ -821,13 +817,11 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race) {
 	return game_setup;
 }
 
-std::unique_ptr<ZergGame> Zerginitialize(const std::string& race) {
+std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfilename, char* techtreefilename) {
 	LOG_INFO("Default log temp.");
 	LOG_DEBUG("Debug log temp.");
 	LOG_ERROR("Error log temp.");
 
-	char     configfilename[128] = "../config.csv";
-	char     techtreefilename[128] = "../techtrees.csv";
 	ifstream file;
 	char    line[1024];
 
@@ -1454,32 +1448,31 @@ void forwardSimulator(Game& game_setup, const std::string& buildlistpath)
 	//TODO: Hier die ForwardSimulator Routine rein
 }
 int main(int argc, char** argv) {
-	// BspParameter : sc2-hots-terran ../terran1.txt
-	if (argc == 3)
+	// BspParameter : ../config.csv ../techtrees.csv sc2-hots-terran ../terran1.txt
+	if (argc == 5)
 	{
-		const std::string& race = argv[1];
+		const std::string& race = argv[3];
 
-		if (race.compare("sc2-hots-terran") == 0)
-		{
-			std::unique_ptr<TerranGame> terran_game = Terraninitialize(argv[1]);
-			forwardSimulator(*terran_game, argv[2]);
+		if (race.compare("sc2-hots-terran") == 0) {
+			std::unique_ptr<TerranGame> terran_game = Terraninitialize(argv[3], argv[1], argv[2]);
+			forwardSimulator(*terran_game, argv[4]);
 		}
 		else if (race.compare("sc2-hots-protoss") == 0)
 		{
-			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize(argv[1]);
-			forwardSimulator(*protoss_game, argv[2]);
+			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize(argv[3], argv[1], argv[2]);
+			forwardSimulator(*protoss_game, argv[4]);
 		}
 		else if (race.compare("sc2-hots-zerg") == 0)
 		{
-			std::unique_ptr<ZergGame> zerg_game = Zerginitialize(argv[1]);
-			forwardSimulator(*zerg_game, argv[2]);
+			std::unique_ptr<ZergGame> zerg_game = Zerginitialize(argv[3], argv[1], argv[2]);
+			forwardSimulator(*zerg_game, argv[4]);
 		}
 		else
 		{
 			LOG_ERROR("Wrong Race Name, pls use sc2-hots-terran, sc2-hots-protoss or  sc2-hots-zerg");
 		}
 	}
-	else
+	else 
 	{
 		LOG_ERROR("Wrong Number of Parameters");
 	}

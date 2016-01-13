@@ -42,7 +42,7 @@ Open solution file `.\bin\Project.sln` in Visual Studio and build the project. M
 Run with the following command:
 
 ```text
-$ ./bin/sc2simulator
+$ ./bin/sc2simulator {ARGUMENTS}
 ```
 
 ### Windows
@@ -50,5 +50,5 @@ $ ./bin/sc2simulator
 Run:
 
 ```text
-$ .\bin\{Debug|Release}\sc2simulator.exe
+$ .\bin\{Debug|Release}\sc2simulator.exe {ARGUMENTS}
 ```
