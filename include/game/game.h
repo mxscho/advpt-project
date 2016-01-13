@@ -38,6 +38,7 @@ public:
 	void add_building_by_name(const std::string& name);
 	const std::list<std::shared_ptr<Unit>>& get_units() const;
 	void add_unit_by_name(const std::string& name);
+	const WorkerUnitAllocation& get_worker_unit_allocation() const;
 
 	unsigned int get_supply_available() const;
 	unsigned int get_supply_used() const;
@@ -64,6 +65,7 @@ protected:
 private:
 	std::list<BuildingBlueprint> m_building_blueprints;
 	std::list<UnitBlueprint> m_unit_blueprints;
+	WorkerUnitAllocation m_worker_unit_allocation;
 
 	std::list<std::reference_wrapper<const Blueprint>> m_satisfied_dependencies;
 	std::list<std::shared_ptr<UnitProduction>> m_morphing_unit_productions;
