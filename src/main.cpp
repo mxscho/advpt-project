@@ -1487,6 +1487,70 @@ void forwardSimulator(const string& race, Game& game, const std::string& buildli
 	}
 	output_formatter.print();
 }
+
+
+void rush(const string& unit, Game& game)
+{
+	//6 Minutes Timelimit to gain as many unit as possible
+	unsigned int Time = 0;//in Sekunden
+	unsigned int targetTime = 6 * 60;// in Sekunden
+}
+void push(const string& unit, Game& game)
+{
+	//Fastest way to achive unit
+}
+void optimizer(const string& task, Game& game)
+{
+	if (task.compare("terran_rush_A") == 0 )
+	{
+		rush("marine",game);
+	}
+	else if ( task.compare("terran_rush_B") == 0)
+	{
+		rush("marauders", game);
+	}
+	else if (task.compare("terran_push_A") == 0)
+	{
+		push("battlecruiser", game);
+	}
+	else if (task.compare("terran_push_B") == 0)
+	{
+		push("tank", game);
+	}
+	else if (task.compare("protoss_rush_A") == 0)
+	{
+		rush("zealots", game);
+	}
+	else if (task.compare("protoss_rush_B") == 0)
+	{
+		rush("stalker", game);
+	}
+	else if (task.compare("protoss_push_A") == 0)
+	{
+		push("void_ray", game);
+	}
+	else if (task.compare("protoss_push_B") == 0)
+	{
+		push("colossus", game);
+	}
+	else if (task.compare("zerg_rush_A") == 0)
+	{
+		rush("zerglings", game);
+	}
+	else if (task.compare("zerg_rush_B") == 0)
+	{
+		rush("roaches", game);
+	}
+	else if (task.compare("zerg_push_A") == 0)
+	{
+		push("brood_lord", game);
+	}
+	else if (task.compare("zerg_push_B") == 0)
+	{
+		push("ultralisk", game);
+	}
+}
+
 int main(int argc, char** argv) {
 	// BspParameter : ../config.csv ../techtrees.csv sc2-hots-terran ../terran1.txt
 	if (argc == 5)
@@ -1512,10 +1576,33 @@ int main(int argc, char** argv) {
 			LOG_ERROR("Wrong Race Name, pls use sc2-hots-terran, sc2-hots-protoss or  sc2-hots-zerg");
 		}
 	}
+	else if (argc == 4)
+	{
+		const std::string& race = argv[3];
+		if (race.compare("terran_rush_A") == 0 || race.compare("terran_rush_B") == 0 || race.compare("terran_push_A") == 0 || race.compare("terran_push_B") == 0)
+		{
+			std::unique_ptr<TerranGame> terran_game = Terraninitialize("sc2-hots-terran", argv[1], argv[2]);
+			optimizer(race, *terran_game);
+		}
+		else if (race.compare("protoss_rush_A") == 0 || race.compare("protoss_rush_B") == 0 || race.compare("protoss_push_A") == 0 || race.compare("protoss_push_B") == 0)
+		{
+			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize("sc2-hots-protoss", argv[1], argv[2]);
+			optimizer(race, *protoss_game);
+		}
+		else if (race.compare("zerg_rush_A") == 0 || race.compare("zerg_rush_B") == 0 || race.compare("zerg_push_A") == 0 || race.compare("zerg_push_B") == 0)
+		{
+			std::unique_ptr<ZergGame> zerg_game = Zerginitialize("sc2-hots-zerg", argv[1], argv[2]);
+			optimizer(race, *zerg_game);
+		}
+		else
+		{
+			LOG_ERROR("Wrong Parameter , pls use terran_rush_A, terran_rush_B or  other");
+		}
+	}
 	else 
 	{
 		LOG_ERROR("Wrong Number of Parameters");
 	}
 
-	// example();
+
 }
