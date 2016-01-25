@@ -11,6 +11,7 @@
 #include "game/unit_blueprint.h"
 #include "game/zerg_game.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 
@@ -46,22 +47,22 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 				file.getline(line, 1024); // Mineralien Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				mineral_count = std::stoi(temp);
+				mineral_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); // Vespene Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				vespene_gas_count = std::stoi(temp);
+				vespene_gas_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //Worker Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				worker = std::stoi(temp);
+				worker = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //BaseBuilding Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				basebuilding = std::stoi(temp);
+				basebuilding = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 
 			}
@@ -112,46 +113,46 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supcosttemp = std::stoi(dummytemp);
+								unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int productmaxtemp = std::stoi(dummytemp);
+							//	unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int minharvtemp = std::stoi(dummytemp);
+								unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vespaharvtemp = std::stoi(dummytemp);
+								unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -201,7 +202,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 								//morph
 
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -277,46 +278,46 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								//unsigned int supcosttemp = std::stoi(dummytemp);
+								//unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int productmaxtemp = std::stoi(dummytemp);
+								unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								//unsigned int minharvtemp = std::stoi(dummytemp);
+								//unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								//unsigned int vespaharvtemp = std::stoi(dummytemp);
+								//unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -356,7 +357,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 
 								//morph
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -452,22 +453,22 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 				file.getline(line, 1024); // Mineralien Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				mineral_count = std::stoi(temp);
+				mineral_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); // Vespene Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				vespene_gas_count = std::stoi(temp);
+				vespene_gas_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //Worker Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				worker = std::stoi(temp);
+				worker = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //BaseBuilding Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				basebuilding = std::stoi(temp);
+				basebuilding = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 
 				
@@ -520,46 +521,46 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supcosttemp = std::stoi(dummytemp);
+								unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int productmaxtemp = std::stoi(dummytemp);
+							//	unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int minharvtemp = std::stoi(dummytemp);
+								unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vespaharvtemp = std::stoi(dummytemp);
+								unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -609,7 +610,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 								//morph
 
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -662,46 +663,46 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int supcosttemp = std::stoi(dummytemp);
+							//	unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int productmaxtemp = std::stoi(dummytemp);
+								unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int minharvtemp = std::stoi(dummytemp);
+							//	unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								//unsigned int vespaharvtemp = std::stoi(dummytemp);
+								//unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -741,7 +742,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 
 								//morph
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -838,22 +839,22 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 				file.getline(line, 1024); // Mineralien Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				mineral_count = std::stoi(temp);
+				mineral_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); // Vespene Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				vespene_gas_count = std::stoi(temp);
+				vespene_gas_count = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //Worker Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				worker = std::stoi(temp);
+				worker = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); //BaseBuilding Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				basebuilding = std::stoi(temp);
+				basebuilding = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 
 
@@ -865,12 +866,12 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 				file.getline(line, 1024); // overlord Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				overlord = std::stoi(temp);
+				overlord = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				file.getline(line, 1024); // larvae Zeile einlesen
 				temp = line;
 				temp = temp.substr(temp.find(",") + 1);
-				larvae = std::stoi(temp);
+				larvae = static_cast<unsigned int>(strtol(temp.c_str(), nullptr, 10));
 				temp.clear();
 				
 			}
@@ -917,46 +918,46 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supcosttemp = std::stoi(dummytemp);
+								unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int productmaxtemp = std::stoi(dummytemp);
+							//	unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int minharvtemp = std::stoi(dummytemp);
+								unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vespaharvtemp = std::stoi(dummytemp);
+								unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -1006,7 +1007,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 								//morph
 
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -1065,46 +1066,46 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 								postemp += nametemp.length() + 1;
 								//MineralCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int mineraltemp = std::stoi(dummytemp);
+								unsigned int mineraltemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//VespereCost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int vesptemp = std::stoi(dummytemp);
+								unsigned int vesptemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Buildtime
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int buildtimetemp = std::stoi(dummytemp);
+								unsigned int buildtimetemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplycost
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int supcosttemp = std::stoi(dummytemp);
+							//	unsigned int supcosttemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Supplyprovide
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int supprovtemp = std::stoi(dummytemp);
+								unsigned int supprovtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Startenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int startentemp = std::stoi(dummytemp);
+								unsigned int startentemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Maxenergy
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int maxenergtemp = std::stoi(dummytemp);
+								unsigned int maxenergtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Race
 								std::string  racetemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
 								postemp += racetemp.length() + 1;
 								//productionmax
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								unsigned int productmaxtemp = std::stoi(dummytemp);
+								unsigned int productmaxtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Mineralharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-							//	unsigned int minharvtemp = std::stoi(dummytemp);
+							//	unsigned int minharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 								//Vesparharvest
 								dummytemp = temp.substr(postemp, temp.find(",", postemp) - postemp);
-								//unsigned int vespaharvtemp = std::stoi(dummytemp);
+								//unsigned int vespaharvtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 								postemp += dummytemp.length() + 1;
 
 								dummytemp.clear();
@@ -1144,7 +1145,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 
 								//morph
 								dummytemp = temp.substr(temp.find_last_of(",") + 1);
-								unsigned int morphtemp = std::stoi(dummytemp);
+								unsigned int morphtemp = static_cast<unsigned int>(strtol(dummytemp.c_str(), nullptr, 10));
 
 								postemp = 0;
 								while (postemp<dependtemp.length())
@@ -1492,8 +1493,8 @@ void forwardSimulator(const string& race, Game& game, const std::string& buildli
 void rush(const string& unit, Game& game)
 {
 	//6 Minutes Timelimit to gain as many unit as possible
-	unsigned int Time = 0;//in Sekunden
-	unsigned int targetTime = 6 * 60;// in Sekunden
+	//unsigned int Time = 0;//in Sekunden
+	//unsigned int targetTime = 6 * 60;// in Sekunden
 }
 void push(const string& unit, Game& game)
 {

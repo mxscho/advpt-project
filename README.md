@@ -33,7 +33,7 @@ Generate Visual Studio project and solution files:
 $ .\generate_windows_{COMPILER}.bat
 ```
 
-Open solution file `.\bin\Project.sln` in Visual Studio and build the project. Make sure to select `sc2simulator` as the startup project.
+Open solution file `.\bin\sc2simulator.sln` in Visual Studio and build the project. Make sure to select `sc2simulator` as the startup project.
 
 ## How to Use
 

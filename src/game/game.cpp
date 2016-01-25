@@ -173,10 +173,7 @@ bool Game::can_construct_buildings_by_names(const std::list<std::string>& names)
 			}
 		}
 		const Unit* unit = find_unit_for_building_constructions(building_blueprints);
-		if (unit) {
-			return true;
-		}
-		return false;
+		return unit != nullptr;
 	}
 	// Construct building.
 	return true;
@@ -230,7 +227,7 @@ bool Game::can_produce_units_by_names(const std::list<std::string>& names) const
 		unit_blueprints.push_back(*unit_blueprint);
 	}
 
-	const UnitBlueprint& unit_blueprint = unit_blueprints.front();
+	const UnitBlueprint& unit_blueprint = unit_blueprints.front().get();
 	if (unit_blueprints.size() == 1 && find_building_for_unit_production(unit_blueprint)) {
 		// Produce unit in building.
 
@@ -299,10 +296,7 @@ bool Game::can_produce_units_by_names(const std::list<std::string>& names) const
 		}
 
 		// Check supply.
-		if (get_remaining_supply() < static_cast<unsigned int>(supply_costs)) {
-			return false;
-		}
-		return true;
+		return get_remaining_supply() >= static_cast<unsigned int>(supply_costs);
 	}
 	return false;
 }
@@ -314,7 +308,7 @@ std::list<std::shared_ptr<const UnitProduction>> Game::produce_units_by_names(co
 		unit_blueprints.push_back(*find_unit_blueprint_by_name(*i));
 	}
 	if (unit_blueprints.size() == 1) {
-		const UnitBlueprint& unit_blueprint = unit_blueprints.front();
+		const UnitBlueprint& unit_blueprint = unit_blueprints.front().get();
 		Building* building = find_building_for_unit_production(unit_blueprint);
 		if (building) {
 			// Produce unit in building.

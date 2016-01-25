@@ -38,7 +38,7 @@ std::list<std::shared_ptr<Unit>> TerranGame::find_builder_units() const {
 	for (auto i = m_current_building_constructions.begin(); i != m_current_building_constructions.end(); ++i) {
 		if (TerranBuildingConstruction* terran_building_construction = dynamic_cast<TerranBuildingConstruction*>(i->get())) {
 			if (!(*i)->is_finished()) {
-				builder_units.remove_if([&terran_building_construction](const std::shared_ptr<Unit>& builder_units) { return builder_units.get() == &terran_building_construction->get_builder_unit(); });
+				builder_units.remove_if([&terran_building_construction](const std::shared_ptr<Unit>& builder_unit) { return builder_unit.get() == &terran_building_construction->get_builder_unit(); });
 			}
 		}
 	}

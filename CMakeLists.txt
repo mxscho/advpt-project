@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+project(sc2simulator)
 
 set(EXECUTABLE sc2simulator)
 set(HEADER_DIRECTORY include)
@@ -7,11 +8,15 @@ set(SOURCE_DIRECTORY src)
 include_directories(${HEADER_DIRECTORY})
 include_directories(${SOURCE_DIRECTORY})
 
-include_directories(${Boost_INCLUDE_DIRS})
+FIND_PACKAGE(Boost)
+IF (Boost_FOUND)
+	include_directories(${Boost_INCLUDE_DIRS})
+	ADD_DEFINITIONS( "-DHAS_BOOST" )
+ENDIF()
 
 set(CMAKE_BUILD_TYPE Debug)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+	set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11")
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "/TP /W3 /WX /EHsc")

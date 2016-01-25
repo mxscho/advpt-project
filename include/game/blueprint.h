@@ -67,8 +67,5 @@ bool operator==(const std::list<std::reference_wrapper<const T_a>>& blueprints_a
 			return false;
 		}
 	}
-	if (blueprints_b_copy.size() > 0) {
-		return false;
-	}
-	return true;
+	return blueprints_b_copy.size() <= 0;
 }
