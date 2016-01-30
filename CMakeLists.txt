@@ -47,6 +47,7 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/updatable.h
 	${HEADER_DIRECTORY}/game/worker_unit_allocation.h
 	${HEADER_DIRECTORY}/game/zerg_game.h
+	${HEADER_DIRECTORY}/game/genetic.h
 	${HEADER_DIRECTORY}/game/events/building_construction_event.h
 	${HEADER_DIRECTORY}/game/events/building_construction_finish_event.h
 	${HEADER_DIRECTORY}/game/events/building_construction_start_event.h
@@ -80,6 +81,7 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/updatable.cpp
 	${SOURCE_DIRECTORY}/game/worker_unit_allocation.cpp
 	${SOURCE_DIRECTORY}/game/zerg_game.cpp
+	${SOURCE_DIRECTORY}/game/genetic.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_event.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_finish_event.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_start_event.cpp
