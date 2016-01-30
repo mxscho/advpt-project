@@ -15,12 +15,17 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 	std::list<std::string> buildlist;
 	int randnmb = 0;
 	int rndtyp = 0;
+	bool correctunit = false;
 	bool listvalid = true;
 	std::string temp = "";
 	//Step 1 build a initialize population
 
 	for (int a=0; a < 20;a++)
 	{
+		correctunit = false;
+		listvalid = true;
+		randnmb = 0;
+		rndtyp = 0;
 		while (listvalid)
 		{
 			
@@ -44,11 +49,11 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			int timefor = forwardSimulator(m_race, game, buildlist);
 			if (timefor>0)
 			{
-				if (timefor > 600 && m_mode == rush)	//wenn bei rush, abbrechen, wenn die liste länger als 6 min ist
+				if (timefor > 360 && m_mode == rush)	//wenn bei rush, abbrechen, wenn die liste länger als 6 min ist erstmal 600, später dann 360
 				{
 					buildlist.pop_back();
-
-					listvalid = false;
+						listvalid = false;
+					
 					break;
 				}
 			
@@ -74,23 +79,28 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 
 			if (temp.compare(unit)==0)
 			{				
+				correctunit = true;
 				if(m_mode==push)
 					listvalid = false;				
 			}
 		}
 		//Step 2 direkt die Fitness mitberechnen
-		std::pair<int, std::list<std::string>> listemp;
-		if (m_mode == push)
+		if (correctunit == true)
 		{
-			listemp.first = fitness(buildlist);
+			std::pair<int, std::list<std::string>> listemp;
+			if (m_mode == push)
+			{
+				listemp.first = fitness(buildlist);
+			}
+			else
+			{
+				listemp.first = forwardSimulator(m_race, game, buildlist);
+			}
+			listemp.second = buildlist;
+			population.push_back(listemp);
 		}
 		else
-		{
-			listemp.first  = forwardSimulator(m_race, game, buildlist);
-		}
-		listemp.second = buildlist;
-		population.push_back(listemp);
-
+			a--;
 
 	}
 
@@ -246,11 +256,86 @@ void Genetic::reproduction(Game& game)
 		std::list<std::string>::iterator itthirdpro = thirdpro->second.begin();
 		std::list<std::string>::iterator itfourthpro = fourthpro->second.begin();
 		
-		//TODO:Sortieren nach Größe
+		
 		int firstsize = firstpro->second.size();
 		int secondsize = secondpro->second.size();
 		int thirdsize = thirdpro->second.size();
 		int fourthsize = fourthpro->second.size();
+
+
+
+		
+			//Sortieren nach Größe
+			for (int aswap = 0;aswap < 3;aswap++)
+			{
+				firstsize = firstpro->second.size();
+				secondsize = secondpro->second.size();
+				thirdsize = thirdpro->second.size();
+				fourthsize = fourthpro->second.size();
+				if (firstsize < secondsize)
+				{
+					std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+					temp = firstpro;
+					firstpro = secondpro;
+					secondpro = temp;
+				}
+				else if (firstsize < thirdsize)
+				{
+					std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+					temp = firstpro;
+					firstpro = thirdpro;
+					thirdpro = temp;
+				}
+				else if (firstsize < fourthsize)
+				{
+					std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+					temp = firstpro;
+					firstpro = fourthpro;
+					fourthpro = temp;
+				}
+			}
+			for (int aswap = 0;aswap < 2;aswap++)
+			{
+
+				secondsize = secondpro->second.size();
+				thirdsize = thirdpro->second.size();
+				fourthsize = fourthpro->second.size();
+
+				if (secondsize < thirdsize)
+				{
+					std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+					temp = secondpro;
+					secondpro = thirdpro;
+					thirdpro = temp;
+				}
+				else if (secondsize < fourthsize)
+				{
+					std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+					temp = secondpro;
+					secondpro = fourthpro;
+					fourthpro = temp;
+				}
+			}
+
+			thirdsize = thirdpro->second.size();
+			fourthsize = fourthpro->second.size();
+			if (thirdsize < fourthsize)
+			{
+				std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+				temp = thirdpro;
+				thirdpro = fourthpro;
+				fourthpro = temp;
+			}
+
+
+		
+
+
+
+
+
+
+
 		int distanzbest = 0;
 		int distanztemp = 0;
 		int counter = 0;
@@ -279,8 +364,15 @@ void Genetic::reproduction(Game& game)
 						}
 					}
 					counter++;
-					//Todo, überprüfung auf größe von 2
 					itsecondpro++;
+					if (secondpro->second.end() == itsecondpro)
+					{
+						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (it)->get_name();
+						secondpro->second.push_back(tempstr);
+					}
 				}
 				else if (d == 1)
 				{
@@ -300,8 +392,16 @@ void Genetic::reproduction(Game& game)
 						}
 					}
 					counter++;
-					//Todo, überprüfung auf größe von 3
+					
 					itthirdpro++;
+					if (thirdpro->second.end() == itthirdpro)
+					{
+						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (it)->get_name();
+						thirdpro->second.push_back(tempstr);
+					}
 				}
 				else if (d == 2)
 				{
@@ -321,8 +421,16 @@ void Genetic::reproduction(Game& game)
 						}
 					}
 					counter++;
-					//Todo, überprüfung auf größe von 4
 					itfourthpro++;
+					if (fourthpro->second.end() == itfourthpro)
+					{
+						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (it)->get_name();
+						fourthpro->second.push_back(tempstr);
+					}
+				
 				}
 			}
 	
@@ -352,8 +460,16 @@ void Genetic::reproduction(Game& game)
 						}
 					}
 					counter++;
-					//Todo, überprüfung auf größe von 2
+					
 					itthirdpro++;
+					if (thirdpro->second.end() == itthirdpro)
+					{
+						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (it)->get_name();
+						thirdpro->second.push_back(tempstr);
+					}
 				}
 				else if (e == 1)
 				{
@@ -373,8 +489,16 @@ void Genetic::reproduction(Game& game)
 						}
 					}
 					counter++;
-					//Todo, überprüfung auf größe von 3
+					
 					itfourthpro++;
+					if (fourthpro->second.end() == itfourthpro)
+					{
+						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (it)->get_name();
+						fourthpro->second.push_back(tempstr);
+					}
 				}
 			}
 		}
@@ -400,21 +524,50 @@ void Genetic::reproduction(Game& game)
 					}
 				}
 				counter++;
-				//Todo, überprüfung auf größe von 2
+				
 				itfourthpro++;
+				if (fourthpro->second.end() == itfourthpro)
+				{
+					std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+					std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+					string tempstr = (it)->get_name();
+					fourthpro->second.push_back(tempstr);
+				}
 			}
 
-		//TODO:Gewinner sortieren nach größe und größen abfangenen rein
+		
 		//Bei jedem Gen zufällig wählen welches, aber jedesmal prüfen ob es geht.
 		//Copy von game
 		std::list<std::string> tempbuildlist;
 		std::list<std::string>::iterator itwinnerone = winnerone->second.begin();
 		std::list<std::string>::iterator itwinnertwo = winnertwo->second.begin();
+		if (winnerone->second.size() < winnertwo->second.size())
+		{
+			std::list<std::pair<int, std::list<std::string>>>::iterator temp;
+
+			temp = winnerone;
+			winnerone = winnertwo;
+			winnertwo = temp;
+
+			itwinnerone = winnerone->second.begin();
+			itwinnertwo = winnertwo->second.begin();
+
+
+		}
 		int genrand = rand() % 2;
 		bool genable = true;
 		
 		while(itwinnerone!= winnerone->second.end())
 		{ 
+			if (winnertwo->second.end() == itwinnertwo)
+			{
+				std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
+				std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+
+				string tempstr = (it)->get_name();
+				winnertwo->second.push_back(tempstr);
+			}
 			if (genrand == 0)
 			{
 				tempbuildlist.push_back(*itwinnerone);
