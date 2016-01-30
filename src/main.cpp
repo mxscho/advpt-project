@@ -10,11 +10,14 @@
 #include "game/terran_game.h"
 #include "game/unit_blueprint.h"
 #include "game/zerg_game.h"
+#include "game/genetic.h"
+
 
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
-
+#include <iterator>
+#include <algorithm>
 using namespace std;
 
 std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* configfilename, char* techtreefilename) {
@@ -1404,28 +1407,9 @@ void example() {
 	}
 }
 
-void forwardSimulator(const string& race, Game& game, const std::string& buildlistpath)
+void forwardSimulator(const string& race, Game& game,  std::list<std::string> buildlist)
 {
-	std::list<std::string> buildlist; //Die eingelesene Liste mit den Aufträgen
-	ifstream file;
-	char    line[1024];
-	file.open(buildlistpath, ios::in);
-	if (file.good())
-	{
-		while (!file.eof())
-		{
-			// Die Datei zeilenweise auslesen
-			file.getline(line, 1024);
-			std::string temp = line;
-			buildlist.push_back(temp);
-		}
-		file.close();
-	}
-	else
-	{
-		LOG_ERROR("Error couldn't read Buildlist");
-		return;
-	}
+	
 	buildlist.remove_if([](const string& buildlist_entry) { return buildlist_entry == ""; });
 	OutputFormatter output_formatter(race);
 	unsigned int time = 0;
@@ -1490,65 +1474,68 @@ void forwardSimulator(const string& race, Game& game, const std::string& buildli
 }
 
 
-void rush(const string& unit, Game& game)
+void rush(const string& unit, Game& game, const string& race)
 {
 	//6 Minutes Timelimit to gain as many unit as possible
 	//unsigned int Time = 0;//in Sekunden
 	//unsigned int targetTime = 6 * 60;// in Sekunden
+	Genetic pushgen(unit, game, 0, race);
 }
-void push(const string& unit, Game& game)
+void push(const string& unit, Game& game, const string& race)
 {
 	//Fastest way to achive unit
+	Genetic pushgen(unit,game, 1,race);
+	
 }
 void optimizer(const string& task, Game& game)
 {
 	if (task.compare("terran_rush_A") == 0 )
 	{
-		rush("marine",game);
+		rush("marine",game,"terran");
 	}
 	else if ( task.compare("terran_rush_B") == 0)
 	{
-		rush("marauders", game);
+		rush("marauders", game, "terran");
 	}
 	else if (task.compare("terran_push_A") == 0)
 	{
-		push("battlecruiser", game);
+		push("battlecruiser", game, "terran");
 	}
 	else if (task.compare("terran_push_B") == 0)
 	{
-		push("tank", game);
+		push("tank", game, "terran");
 	}
 	else if (task.compare("protoss_rush_A") == 0)
 	{
-		rush("zealots", game);
+		rush("zealots", game, "protoss");
 	}
 	else if (task.compare("protoss_rush_B") == 0)
 	{
-		rush("stalker", game);
+		rush("stalker", game,"protoss");
 	}
 	else if (task.compare("protoss_push_A") == 0)
 	{
-		push("void_ray", game);
+		push("void_ray", game, "protoss");
 	}
 	else if (task.compare("protoss_push_B") == 0)
 	{
-		push("colossus", game);
+		push("colossus", game, "protoss");
 	}
 	else if (task.compare("zerg_rush_A") == 0)
 	{
-		rush("zerglings", game);
+		rush("zerglings", game, "zerg");
 	}
 	else if (task.compare("zerg_rush_B") == 0)
 	{
-		rush("roaches", game);
+		rush("roaches", game, "zerg");
 	}
 	else if (task.compare("zerg_push_A") == 0)
 	{
-		push("brood_lord", game);
+		push("brood_lord", game, "zerg");
 	}
 	else if (task.compare("zerg_push_B") == 0)
 	{
-		push("ultralisk", game);
+		push("ultralisk", game, "zerg");
 	}
 }
 
@@ -1558,19 +1545,40 @@ int main(int argc, char** argv) {
 	{
 		const std::string& race = argv[3];
 
+		std::list<std::string> buildlist; //Die eingelesene Liste mit den Aufträgen
+		ifstream file;
+		char    line[1024];
+		file.open(argv[4], ios::in);
+		if (file.good())
+		{
+			while (!file.eof())
+			{
+				// Die Datei zeilenweise auslesen
+				file.getline(line, 1024);
+				std::string temp = line;
+				buildlist.push_back(temp);
+			}
+			file.close();
+		}
+		else
+		{
+			LOG_ERROR("Error couldn't read Buildlist");			
+		}
+
+
 		if (race.compare("sc2-hots-terran") == 0) {
 			std::unique_ptr<TerranGame> terran_game = Terraninitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(race, *terran_game, argv[4]);
+			forwardSimulator(race, *terran_game, buildlist);
 		}
 		else if (race.compare("sc2-hots-protoss") == 0)
 		{
 			std::unique_ptr<ProtossGame> protoss_game = Protossinitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(race, *protoss_game, argv[4]);
+			forwardSimulator(race, *protoss_game, buildlist);
 		}
 		else if (race.compare("sc2-hots-zerg") == 0)
 		{
 			std::unique_ptr<ZergGame> zerg_game = Zerginitialize(argv[3], argv[1], argv[2]);
-			forwardSimulator(race, *zerg_game, argv[4]);
+			forwardSimulator(race, *zerg_game, buildlist);
 		}
 		else
 		{
@@ -1592,6 +1600,7 @@ int main(int argc, char** argv) {
 		}
 		else if (race.compare("zerg_rush_A") == 0 || race.compare("zerg_rush_B") == 0 || race.compare("zerg_push_A") == 0 || race.compare("zerg_push_B") == 0)
 		{
+
 			std::unique_ptr<ZergGame> zerg_game = Zerginitialize("sc2-hots-zerg", argv[1], argv[2]);
 			optimizer(race, *zerg_game);
 		}
