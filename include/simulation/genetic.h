@@ -40,7 +40,7 @@ public:
 protected:
 	
 private:
-	int forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist);
+	int forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist, int time);
 	int fitness(std::list<std::string> buildlist);
 	void selection();
 	void reproduction(Game& game);
