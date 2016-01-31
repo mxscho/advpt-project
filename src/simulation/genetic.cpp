@@ -55,6 +55,32 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 					//Name der Unit
 					temp = (*it)->get_name();
 					//Alle Gebäude durchlaufen
+					const std::list<std::reference_wrapper<const Blueprint>> tdepe = (*it)->get_dependency_blueprints();
+					if (tdepe.empty()&& race.compare("zerg")==0)
+						depend = true;
+
+					for (std::list<std::reference_wrapper<const Blueprint>>::const_iterator ite = tdepe.begin(); ite != tdepe.end(); ++ite)
+					{
+						if (ite->get().get_name().compare(temp) == 0)
+						{
+							depend = true;
+							break;
+						}
+						for (std::list<std::string>::iterator its = buildlist.begin(); its != buildlist.end(); ++its)
+						{
+							if (its->compare(ite->get().get_name()) == 0)
+							{
+								depend = true;
+								break;
+							}
+
+						}
+
+					}
+
+
+
+
 					for (std::list<std::shared_ptr<BuildingBlueprint>>::iterator it = i_building.begin(); it != i_building.end(); ++it)
 					{
 						//WAs kann das gebäude alles Produzieren
@@ -198,7 +224,7 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			{
 				if (temp.compare(unit) == 0 || correctunit )
 				{
-					int timefor = forwardSimulator(m_race, game, buildlist);
+					int timefor = forwardSimulator(m_race, game, buildlist, 400);
 					
 					if (timefor>0)
 					{
@@ -239,47 +265,21 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			}
 			else
 			{
-
-
-			int timefor = forwardSimulator(m_race, game, buildlist);
-			if (timefor>0)
-			{
-				if (timefor > 360 && m_mode == rush)	//wenn bei rush, abbrechen, wenn die liste länger als 6 min ist erstmal 600, später dann 360
-				{
-					buildlist.pop_back();
+				if (temp.compare(unit) == 0)
+				{					
+					if (forwardSimulator(m_race, game, buildlist,10000)>0)
+					{				
+						correctunit = true;
 						listvalid = false;
-					
-					break;
+						break;						
+					}
+					else
+					{
+						listvalid = false;
+						break;
+					}
 				}
-				else if (timefor>900 && m_mode==push)
-				{
-					break;
-				}
-			
-			}
-			else
-			{
-				buildlist.pop_back();
-			}
-
-
-
-			
-
-
-			//Randomizer ob Unit oder Building
-			//Randomizer welche Unit/Building
-						
-				std::list<std::string>::iterator ite = buildlist.end();		
-				ite--;
-				temp = { *ite };
-
-				if (temp.compare(unit)==0)
-				{				
-					correctunit = true;
-					if(m_mode==push)
-						listvalid = false;				
-				}
+				
 			}
 			rndtyp = rand() % 2;
 			if (rndtyp == 0)
@@ -291,7 +291,9 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 				randnmb = rand() % (game.get_building_blueprints().size() - 1) + 1;
 			}
 
-			if (buildlist.size() > 100)
+			if (buildlist.size() > 30 && m_mode == rush)
+				listvalid = false;
+			else if(buildlist.size() > 100)
 				listvalid = false;
 		}
 		//Step 2 direkt die Fitness mitberechnen
@@ -304,7 +306,7 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			std::pair<int, std::list<std::string>> listemp;
 			if (m_mode == push)
 			{
-				listemp.first = forwardSimulator(m_race, game, buildlist);
+				listemp.first = forwardSimulator(m_race, game, buildlist,1000);
 			}
 			else
 			{
@@ -379,7 +381,7 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 		}
 	}
 	//Step 8 Best solution nochmal durchlaufen lassen
-	int result=	forwardSimulator(m_race, game, bestsolution->second);
+	int result=	forwardSimulator(m_race, game, bestsolution->second,1000);
 	if (result > 360 && m_mode == rush)
 	bestsolution->second.pop_back();
 
@@ -388,6 +390,12 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 	{
 		ForwardSimulator forward_simulator(game);
 		forward_simulator.simulate(bestsolution->second, 360);
+		forward_simulator.get_output_formatter().print();
+	}
+	else
+	{
+		ForwardSimulator forward_simulator(game);
+		forward_simulator.simulate(bestsolution->second, 1000);
 		forward_simulator.get_output_formatter().print();
 	}
 
@@ -868,14 +876,23 @@ void Genetic::reproduction(Game& game)
 			{
 				tempbuildlist.push_back(*itwinnertwo);
 			}
-
-			if (forwardSimulator(m_race, game, tempbuildlist) > 0)
+			int ti = 0 ;
+			if (m_mode == rush)
 			{
-				genrand = rand() % 2;
-				itwinnerone++;
-				itwinnertwo++;
-				genable = true;
+				ti = forwardSimulator(m_race, game, tempbuildlist, 400);
 			}
+			else
+			{
+				ti = forwardSimulator(m_race, game, tempbuildlist, 1000);
+			}
+				if ( ti> 0)
+				{
+					genrand = rand() % 2;
+					itwinnerone++;
+					itwinnertwo++;
+					genable = true;
+				}
+			
 			else
 			{
 
@@ -911,7 +928,7 @@ void Genetic::reproduction(Game& game)
 		}
 		else
 		{
-			listemp.first = forwardSimulator(m_race, game, tempbuildlist);
+			listemp.first = forwardSimulator(m_race, game, tempbuildlist,1000);
 		}
 		listemp.second = tempbuildlist;
 		newpopulation.push_back(listemp);
@@ -1025,14 +1042,14 @@ void Genetic::selection()
 	m_bestfitnes = fitness;
 	if (m_mode == push) //push
 	{
-		tempit->first = m_bestfitnes;
-		tempfirst->first = m_bestfitnes ;
+		tempit->first = m_bestfitnes+1;
+		tempfirst->first = m_bestfitnes+1;
 		//tempprod->first = m_bestfitnes + 1;
 	}
 	else //rush
 	{
-		tempit->first = m_bestfitnes;
-		tempfirst->first = m_bestfitnes ;
+		tempit->first = m_bestfitnes-1;
+		tempfirst->first = m_bestfitnes-1 ;
 		//tempprod->first = m_bestfitnes - 1;
 	}
 }
@@ -1063,9 +1080,9 @@ int Genetic::fitness(std::list<std::string> buildlist)
 }
 
 
-int Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist) {
+int Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist, int time) {
 	ForwardSimulator forward_simulator(game);
-	forward_simulator.simulate(buildlist, 400);
+	forward_simulator.simulate(buildlist, time);
 	return forward_simulator.is_successful() ? forward_simulator.get_time() : 0;
 }
 /*
