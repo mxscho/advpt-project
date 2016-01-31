@@ -20,7 +20,7 @@ public:
 	void call_mule();
 protected:
 	virtual std::list<std::shared_ptr<Unit>> find_worker_units() const override;
-	virtual std::unique_ptr<BuildingConstruction> create_building_construction(const BuildingBlueprint& building_blueprint) override;
+	virtual std::unique_ptr<BuildingConstruction> create_building_construction(const BuildingBlueprint& building_blueprint, bool is_morphing) override;
 private:
 	std::list<std::shared_ptr<Unit>> find_builder_units() const;
 };

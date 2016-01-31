@@ -67,7 +67,7 @@ protected:
 	const Building* find_building_for_building_construction(const BuildingBlueprint& building_blueprint) const;
 	const Unit* find_unit_for_building_constructions(const std::list<std::reference_wrapper<const BuildingBlueprint>>& building_blueprints) const;
 	virtual std::list<std::shared_ptr<Unit>> find_worker_units() const;
-	virtual std::unique_ptr<BuildingConstruction> create_building_construction(const BuildingBlueprint& building_blueprint);
+	virtual std::unique_ptr<BuildingConstruction> create_building_construction(const BuildingBlueprint& building_blueprint, bool is_morphing);
 private:
 	std::list<std::shared_ptr<BuildingBlueprint>> m_building_blueprints;
 	std::list<std::shared_ptr<UnitBlueprint>> m_unit_blueprints;

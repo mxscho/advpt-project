@@ -86,7 +86,7 @@ banshee,150,100,60,3,0,0,0,terran,0,0,0,0,starport_with_tech_lab,
 battlecruiser,400,300,90,6,0,0,0,terran,0,0,0,0,starport_with_tech_lab,fusion_core
 #buildings,,,,,0,,,,,
 command_center,400,0,100,0,11,0,0,terran,1,0,0,0,scv,
-orbital_command,150,0,35,0,11,50,200,terran,1,0,0,0,command_center,barracks/barracks_with_tech_lab/barracks_with_reactor
+orbital_command,150,0,35,0,11,50,200,terran,1,0,0,1,command_center,barracks/barracks_with_tech_lab/barracks_with_reactor
 planetary_fortress,150,150,50,0,11,0,0,terran,1,0,0,1,orbital_command,engineering_bay
 refinery,75,0,30,0,0,0,0,terran,1,0,0,0,scv,
 engineering_bay,125,0,35,0,0,0,0,terran,1,0,0,0,scv,

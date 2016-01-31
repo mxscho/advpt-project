@@ -35,6 +35,8 @@ Game::Game(unsigned int mineral_count, unsigned int vespene_gas_count)
 	m_morphing_unit_productions(),
 	m_worker_unit_allocation_function(c_default_worker_allocation_function),
 	m_collected_events() {
+	auto worker_units = find_worker_units();
+	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 }
 Game::Game(const Game& game)
 	: Updatable(),
@@ -53,6 +55,9 @@ Game::Game(const Game& game)
 	assert(!is_busy()); // Game cannot be copied while busy.
 	std::transform(game.m_buildings.begin(), game.m_buildings.end(), std::back_inserter(m_buildings), [](std::shared_ptr<Building> building) { return std::shared_ptr<Building>(new Building(*building)); });
 	std::transform(game.m_units.begin(), game.m_units.end(), std::back_inserter(m_units), [](std::shared_ptr<Unit> unit) { return std::shared_ptr<Unit>(new Unit(*unit)); });
+
+	auto worker_units = find_worker_units();
+	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 }
 Game& Game::operator=(const Game& game) {
 	assert(!is_busy()); // Game cannot be copied while busy.
@@ -74,6 +79,9 @@ Game& Game::operator=(const Game& game) {
 	m_morphing_unit_productions.clear();
 	m_worker_unit_allocation_function = game.m_worker_unit_allocation_function;
 	m_collected_events.clear();
+
+	auto worker_units = find_worker_units();
+	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 
 	return *this;
 }
@@ -283,7 +291,8 @@ std::list<std::shared_ptr<const BuildingConstruction>> Game::construct_buildings
 		building_blueprints.push_back(*building_blueprint);
 	}
 
-	if (do_building_constructions_require_morphing(building_blueprints)) {
+	bool is_morphing = do_building_constructions_require_morphing(building_blueprints);
+	if (is_morphing) {
 		// Morph building from building or unit.
 		bool already_removed = false;
 		if (building_blueprints.size() == 1) {
@@ -305,7 +314,7 @@ std::list<std::shared_ptr<const BuildingConstruction>> Game::construct_buildings
 	for (auto i_building_blueprint = building_blueprints.begin(); i_building_blueprint != building_blueprints.end(); ++i_building_blueprint) {
 		m_raw_mineral_count -= i_building_blueprint->get().get_mineral_costs() * 1000;
 		m_raw_vespene_gas_count -= i_building_blueprint->get().get_vespene_gas_costs() * 1000;
-		m_current_building_constructions.emplace_back(create_building_construction(i_building_blueprint->get()).release());
+		m_current_building_constructions.emplace_back(create_building_construction(i_building_blueprint->get(), is_morphing).release());
 		building_constructions.push_back(m_current_building_constructions.back());
 		m_collected_events.emplace_back(new BuildingConstructionStartEvent(m_current_building_constructions.back()));
 	}
@@ -542,8 +551,6 @@ std::list<std::unique_ptr<Event>> Game::update(unsigned int elapsed_time_seconds
 	m_collected_events = std::list<std::unique_ptr<Event>>();
 
 	// Update resources (minerals, vespene gas and energy) and life durations.
-	auto worker_units = find_worker_units();
-	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 	auto& minearal_collecting_worker_units = m_worker_unit_allocation.get_mineral_collecting_worker_units();
 	for (auto i_minearal_collecting_worker_unit = minearal_collecting_worker_units.begin(); i_minearal_collecting_worker_unit != minearal_collecting_worker_units.end(); ++i_minearal_collecting_worker_unit) {
 		unsigned int collecting_duration_seconds = (*i_minearal_collecting_worker_unit)->is_immortal() || elapsed_time_seconds < (*i_minearal_collecting_worker_unit)->get_remaining_life_duration_seconds() ? elapsed_time_seconds : (*i_minearal_collecting_worker_unit)->get_remaining_life_duration_seconds();
@@ -622,6 +629,7 @@ std::list<std::unique_ptr<Event>> Game::update(unsigned int elapsed_time_seconds
 		}
 	}
 
+	auto worker_units = find_worker_units();
 	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 
 	return events;
@@ -676,7 +684,7 @@ std::list<std::shared_ptr<Unit>> Game::find_worker_units() const {
 	});
 	return worker_units;
 }
-std::unique_ptr<BuildingConstruction> Game::create_building_construction(const BuildingBlueprint& building_blueprint) {
+std::unique_ptr<BuildingConstruction> Game::create_building_construction(const BuildingBlueprint& building_blueprint, bool is_morphing) {
 	return std::unique_ptr<BuildingConstruction>(new BuildingConstruction(building_blueprint));
 }
 

@@ -51,6 +51,10 @@ std::list<std::shared_ptr<Unit>> TerranGame::find_builder_units() const {
 	}
 	return builder_units;
 }
-std::unique_ptr<BuildingConstruction> TerranGame::create_building_construction(const BuildingBlueprint& building_blueprint) {
-	return std::unique_ptr<BuildingConstruction>(new TerranBuildingConstruction(building_blueprint, *find_builder_units().front()));
+std::unique_ptr<BuildingConstruction> TerranGame::create_building_construction(const BuildingBlueprint& building_blueprint, bool is_morphing) {
+	if (is_morphing) {
+		return std::unique_ptr<BuildingConstruction>(new BuildingConstruction(building_blueprint));
+	} else {
+		return std::unique_ptr<BuildingConstruction>(new TerranBuildingConstruction(building_blueprint, *find_builder_units().front()));
+	}
 }
