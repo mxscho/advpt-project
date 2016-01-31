@@ -74,7 +74,7 @@ Game& Game::operator=(const Game& game) {
 	m_morphing_unit_productions.clear();
 	m_worker_unit_allocation_function = game.m_worker_unit_allocation_function;
 	m_collected_events.clear();
-	
+
 	return *this;
 }
 Game::~Game() {
@@ -192,6 +192,44 @@ unsigned int Game::get_remaining_supply() const {
 void Game::set_worker_unit_allocation_function(const std::function<WorkerUnitAllocation(const Game&, const std::list<std::shared_ptr<Unit>>&)>& worker_unit_allocation_function) {
 	m_worker_unit_allocation_function = worker_unit_allocation_function;
 }
+bool Game::can_ever_construct_buildings_by_names(const std::list<std::string>& names) const {
+	std::list<std::reference_wrapper<const BuildingBlueprint>> building_blueprints;
+	for (auto i = names.begin(); i != names.end(); ++i) {
+		const BuildingBlueprint* building_blueprint = find_building_blueprint_by_name(*i);
+		if (!building_blueprint) {
+			return false;
+		}
+		building_blueprints.push_back(*building_blueprint);
+
+		// Check resources.
+		if (((building_blueprint->get_mineral_costs() * 1000 > m_raw_mineral_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_mineral_collecting_worker_units().begin(), m_worker_unit_allocation.get_mineral_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_mineral_collection_rate() > 0; })) ||
+			(building_blueprint->get_vespene_gas_costs() * 1000 > m_raw_vespene_gas_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }) &&
+			!std::any_of(m_current_building_constructions.begin(), m_current_building_constructions.end(), [](const std::shared_ptr<BuildingConstruction>& building_construction) { return building_construction->get_building_blueprint().get_name() == "refinery" || building_construction->get_building_blueprint().get_name() == "assimilator" || building_construction->get_building_blueprint().get_name() == "extractor"; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().begin(), m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; })))) {
+			return false;
+		}
+
+		// Check dependencies.
+		auto& dependency_blueprints = building_blueprint->get_dependency_blueprints();
+		bool is_dependency_satisfied = dependency_blueprints.size() == 0;
+		for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
+			for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
+				if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
+					is_dependency_satisfied = true;
+				}
+			}
+		}
+		if (!is_dependency_satisfied) {
+			return is_busy();
+		}
+	}
+	return true;
+}
 bool Game::can_construct_buildings_by_names(const std::list<std::string>& names) const {
 	std::list<std::reference_wrapper<const BuildingBlueprint>> building_blueprints;
 	for (auto i = names.begin(); i != names.end(); ++i) {
@@ -209,16 +247,16 @@ bool Game::can_construct_buildings_by_names(const std::list<std::string>& names)
 
 		// Check dependencies.
 		auto& dependency_blueprints = building_blueprint->get_dependency_blueprints();
+		bool is_dependency_satisfied = dependency_blueprints.size() == 0;
 		for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
-			bool is_dependency_satisfied = false;
 			for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
 				if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
 					is_dependency_satisfied = true;
 				}
 			}
-			if (!is_dependency_satisfied) {
-				return false;
-			}
+		}
+		if (!is_dependency_satisfied) {
+			return false;
 		}
 	}
 
@@ -273,6 +311,112 @@ std::list<std::shared_ptr<const BuildingConstruction>> Game::construct_buildings
 	}
 	return building_constructions;
 }
+bool Game::can_ever_produce_units_by_names(const std::list<std::string>& names) const {
+	assert(names.size() > 0);
+
+	std::list<std::reference_wrapper<const UnitBlueprint>> unit_blueprints;
+	for (auto i = names.begin(); i != names.end(); ++i) {
+		const UnitBlueprint* unit_blueprint = find_unit_blueprint_by_name(*i);
+		if (!unit_blueprint) {
+			return false;
+		}
+		unit_blueprints.push_back(*unit_blueprint);
+	}
+
+	const UnitBlueprint& unit_blueprint = unit_blueprints.front().get();
+	if (unit_blueprints.size() == 1 && find_building_for_unit_production(unit_blueprint)) {
+		// Produce unit in building.
+
+		// Check resources.
+		if (((unit_blueprint.get_mineral_costs() * 1000 > m_raw_mineral_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_mineral_collecting_worker_units().begin(), m_worker_unit_allocation.get_mineral_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_mineral_collection_rate() > 0; })) ||
+			(unit_blueprint.get_vespene_gas_costs() * 1000 > m_raw_vespene_gas_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }) &&
+			!std::any_of(m_current_building_constructions.begin(), m_current_building_constructions.end(), [](const std::shared_ptr<BuildingConstruction>& building_construction) { return building_construction->get_building_blueprint().get_name() == "refinery" || building_construction->get_building_blueprint().get_name() == "assimilator" || building_construction->get_building_blueprint().get_name() == "extractor"; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().begin(), m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; })))) {
+			return false;
+		}
+
+		// Check supply.
+		if (get_remaining_supply() < unit_blueprint.get_supply_costs() &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_supply_provided() > 0; }) &&
+			!std::any_of(m_current_building_constructions.begin(), m_current_building_constructions.end(), [](const std::shared_ptr<BuildingConstruction>& building_construction) { return building_construction->get_building_blueprint().get_supply_provided() > 0; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_supply_provided() > 0; }); })) {
+			return false;
+		}
+
+		// Check dependencies.
+		auto& dependency_blueprints = unit_blueprint.get_dependency_blueprints();
+		for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
+			for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
+				if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
+					return true;
+				}
+			}
+		}
+		return dependency_blueprints.size() == 0 || is_busy();
+	}
+
+	const Unit* unit = find_unit_for_unit_productions(unit_blueprints);
+	if (unit) {
+		// Morph units from unit.
+
+		unsigned int mineral_costs = 0;
+		unsigned int vespene_gas_costs = 0;
+		int supply_costs = 0;
+		for (auto i_unit_blueprint = unit_blueprints.begin(); i_unit_blueprint != unit_blueprints.end(); ++i_unit_blueprint) {
+			mineral_costs += i_unit_blueprint->get().get_mineral_costs();
+			vespene_gas_costs += i_unit_blueprint->get().get_vespene_gas_costs();
+			supply_costs += i_unit_blueprint->get().get_supply_costs();
+
+			// Check dependencies.
+			auto& dependency_blueprints = i_unit_blueprint->get().get_dependency_blueprints();
+			bool is_dependency_satisfied = dependency_blueprints.size() == 0;
+			for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
+				for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
+					if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
+						is_dependency_satisfied = true;
+					}
+				}
+			}
+			if (!is_dependency_satisfied && !is_busy()) {
+				return false;
+			}
+		}
+		supply_costs -= unit->get_unit_blueprint().get_supply_costs();
+		if (supply_costs < 0) {
+			supply_costs = 0;
+		}
+
+		// Check resources.
+		if (((mineral_costs * 1000 > m_raw_mineral_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_mineral_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_mineral_collecting_worker_units().begin(), m_worker_unit_allocation.get_mineral_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_mineral_collection_rate() > 0; })) ||
+			(vespene_gas_costs * 1000 > m_raw_vespene_gas_count &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }) &&
+			!std::any_of(m_current_building_constructions.begin(), m_current_building_constructions.end(), [](const std::shared_ptr<BuildingConstruction>& building_construction) { return building_construction->get_building_blueprint().get_name() == "refinery" || building_construction->get_building_blueprint().get_name() == "assimilator" || building_construction->get_building_blueprint().get_name() == "extractor"; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; }); }) &&
+			!std::any_of(m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().begin(), m_worker_unit_allocation.get_vespene_gas_collecting_worker_units().end(), [](const std::shared_ptr<Unit>& worker_unit) { return worker_unit->get_unit_blueprint().get_vespene_gas_collection_rate() > 0; })))) {
+			return false;
+		}
+
+		// Check supply.
+		if (get_remaining_supply() < static_cast<unsigned int>(supply_costs) &&
+			!std::any_of(m_morphing_unit_productions.begin(), m_morphing_unit_productions.end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_supply_provided() > 0; }) &&
+			!std::any_of(m_current_building_constructions.begin(), m_current_building_constructions.end(), [](const std::shared_ptr<BuildingConstruction>& building_construction) { return building_construction->get_building_blueprint().get_supply_provided() > 0; }) &&
+			!std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return std::any_of(building->get_current_unit_productions().begin(), building->get_current_unit_productions().end(), [](const std::shared_ptr<UnitProduction>& unit_production) { return unit_production->get_unit_blueprint().get_supply_provided() > 0; }); })) {
+			return false;
+		}
+
+		return true;
+	}
+
+	return is_busy();
+}
 bool Game::can_produce_units_by_names(const std::list<std::string>& names) const {
 	assert(names.size() > 0);
 
@@ -303,17 +447,13 @@ bool Game::can_produce_units_by_names(const std::list<std::string>& names) const
 		// Check dependencies.
 		auto& dependency_blueprints = unit_blueprint.get_dependency_blueprints();
 		for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
-			bool is_dependency_satisfied = false;
 			for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
 				if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
-					is_dependency_satisfied = true;
+					return true;
 				}
 			}
-			if (!is_dependency_satisfied) {
-				return false;
-			}
 		}
-		return true;
+		return dependency_blueprints.size() == 0;
 	}
 
 	const Unit* unit = find_unit_for_unit_productions(unit_blueprints);
@@ -330,16 +470,16 @@ bool Game::can_produce_units_by_names(const std::list<std::string>& names) const
 
 			// Check dependencies.
 			auto& dependency_blueprints = i_unit_blueprint->get().get_dependency_blueprints();
+			bool is_dependency_satisfied = dependency_blueprints.size() == 0;
 			for (auto i_dependency_blueprint = dependency_blueprints.begin(); i_dependency_blueprint != dependency_blueprints.end(); ++i_dependency_blueprint) {
-				bool is_dependency_satisfied = false;
 				for (auto i_satisfied_dependency = m_satisfied_dependencies.begin(); i_satisfied_dependency != m_satisfied_dependencies.end(); ++i_satisfied_dependency) {
 					if (&i_dependency_blueprint->get() == &i_satisfied_dependency->get()) {
 						is_dependency_satisfied = true;
 					}
 				}
-				if (!is_dependency_satisfied) {
-					return false;
-				}
+			}
+			if (!is_dependency_satisfied) {
+				return false;
 			}
 		}
 		supply_costs -= unit->get_unit_blueprint().get_supply_costs();
@@ -481,6 +621,8 @@ std::list<std::unique_ptr<Event>> Game::update(unsigned int elapsed_time_seconds
 			++i_morphing_unit_production;
 		}
 	}
+
+	m_worker_unit_allocation = m_worker_unit_allocation_function(*this, worker_units);
 
 	return events;
 }

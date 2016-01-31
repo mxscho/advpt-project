@@ -8,6 +8,9 @@
 
 Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 {
+	// Set seed for randoms.
+	srand(0);
+
 	//Step 0 initialize
 	//std::list<std::list<std::string>> population;
 	m_mode = mode;
@@ -765,7 +768,7 @@ int Genetic::fitness(std::list<std::string> buildlist)
 
 int Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist) {
 	ForwardSimulator forward_simulator(game);
-	forward_simulator.simulate(buildlist, 1000);
+	forward_simulator.simulate(buildlist, 10000);
 	return forward_simulator.is_successful() ? forward_simulator.get_time() : 0;
 }
 /*

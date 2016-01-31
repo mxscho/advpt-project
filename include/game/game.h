@@ -48,8 +48,10 @@ public:
 	unsigned int get_supply_used() const;
 	unsigned int get_remaining_supply() const;
 	void set_worker_unit_allocation_function(const std::function<WorkerUnitAllocation(const Game&, const std::list<std::shared_ptr<Unit>>&)>& worker_unit_allocation_function);
+	virtual bool can_ever_construct_buildings_by_names(const std::list<std::string>& names) const;
 	virtual bool can_construct_buildings_by_names(const std::list<std::string>& names) const;
 	std::list<std::shared_ptr<const BuildingConstruction>> construct_buildings_by_names(const std::list<std::string>& names);
+	bool can_ever_produce_units_by_names(const std::list<std::string>& names) const;
 	bool can_produce_units_by_names(const std::list<std::string>& names) const;
 	std::list<std::shared_ptr<const UnitProduction>> produce_units_by_names(const std::list<std::string>& names);
 

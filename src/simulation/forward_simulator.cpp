@@ -75,6 +75,10 @@ void ForwardSimulator::simulate(const std::list<std::string>& build_list, unsign
 			} else if (m_game->can_produce_units_by_names({ local_build_list.front() })) {
 				m_game->produce_units_by_names({ local_build_list.front() });
 				local_build_list.pop_front();
+			} else if (!m_game->can_ever_construct_buildings_by_names({ local_build_list.front() }) &&
+				!m_game->can_ever_produce_units_by_names({ local_build_list.front() })) {
+				m_successful = false;
+				break;
 			}
 			events.splice(events.end(), m_game->update(0));
 		}
@@ -85,5 +89,8 @@ void ForwardSimulator::simulate(const std::list<std::string>& build_list, unsign
 			break;
 		}
 	}
-	m_output_formatter.set_validity(m_time <= max_time);
+	if (m_time > max_time) {
+		m_successful = false;
+	}
+	m_output_formatter.set_validity(m_successful);
 }
