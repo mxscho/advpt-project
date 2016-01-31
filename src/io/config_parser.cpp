@@ -199,7 +199,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
 											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
 										} else {
-											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										}
 
 									}
@@ -343,7 +343,7 @@ std::unique_ptr<TerranGame> Terraninitialize(const std::string& race, char* conf
 										postemp += dumtemp.length() + 1;
 
 										if (BuildingBlueprint* building_blueprint = game_setup->find_building_blueprint_by_name(dumtemp)) {
-											building_blueprint->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											building_blueprint->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										} else {
 											game_setup->find_unit_blueprint_by_name(dumtemp)->add_morphable_blueprints({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										}
@@ -571,7 +571,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
 											unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp) });
 										} else {
-											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										}
 									}
 								}
@@ -694,7 +694,7 @@ std::unique_ptr<ProtossGame> Protossinitialize(const std::string& race, char* co
 										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
 											unit_blueprint->add_morphable_blueprints({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										} else {
-											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										}
 									}
 								}
@@ -937,7 +937,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 												unit_blueprint->add_morphable_blueprints({ *game_setup->find_unit_blueprint_by_name(nametemp), *game_setup->find_unit_blueprint_by_name(nametemp) });
 											}
 										} else {
-											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										}
 									}
 								}
@@ -1060,7 +1060,7 @@ std::unique_ptr<ZergGame> Zerginitialize(const std::string& race, char* configfi
 										if (UnitBlueprint* unit_blueprint = game_setup->find_unit_blueprint_by_name(dumtemp)) {
 											unit_blueprint->add_morphable_blueprints({ *game_setup->find_building_blueprint_by_name(nametemp) });
 										} else {
-											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint({ *game_setup->find_building_blueprint_by_name(nametemp) });
+											game_setup->find_building_blueprint_by_name(dumtemp)->add_morphable_building_blueprint(*game_setup->find_building_blueprint_by_name(nametemp));
 										}
 									}
 								}

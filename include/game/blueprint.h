@@ -19,6 +19,8 @@ public:
 		unsigned int start_energy,
 		unsigned int max_energy,
 		unsigned int supply_provided);
+	Blueprint(const Blueprint& blueprint) = delete;
+	Blueprint& operator=(const Blueprint& blueprint) = delete;
 	virtual ~Blueprint() = 0;
 
 	const Race& get_race() const;

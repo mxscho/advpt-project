@@ -29,7 +29,7 @@ const std::list<std::shared_ptr<UnitProduction>>& Building::get_current_unit_pro
 }
 
 bool Building::can_morph(const BuildingBlueprint& building_blueprint) const {
-	if (is_working_to_capacity()) {
+	if (m_current_unit_productions.size() > 0) {
 		return false;
 	}
 

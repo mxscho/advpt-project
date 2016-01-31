@@ -17,7 +17,15 @@ TerranGame* TerranGame::clone() const {
 }
 
 bool TerranGame::can_construct_buildings_by_names(const std::list<std::string>& names) const {
-	return Game::can_construct_buildings_by_names(names) && find_builder_units().size() > 0;
+	std::list<std::reference_wrapper<const BuildingBlueprint>> building_blueprints;
+	for (auto i = names.begin(); i != names.end(); ++i) {
+		const BuildingBlueprint* building_blueprint = find_building_blueprint_by_name(*i);
+		if (!building_blueprint) {
+			return false;
+		}
+		building_blueprints.push_back(*building_blueprint);
+	}
+	return Game::can_construct_buildings_by_names(names) && (!do_building_constructions_require_morphing(building_blueprints) || find_builder_units().size() > 0);
 }
 void TerranGame::call_mule() {
 	throw; // TODO

@@ -53,7 +53,9 @@ int main(int argc, char** argv) {
 	if (argc == 5) {
 		// Example Parameter: ../config.csv ../techtrees.csv sc2-hots-terran ../terran1.txt
 		std::list<std::string> build_list = ConfigParser::create_build_list(argc, argv);
-		do_forward_simulation(*game, build_list);
+		if (build_list.size() > 0) {
+			do_forward_simulation(*game, build_list);
+		}
 	} else if (argc == 4) {
 		// Example Parameter: ../config.csv ../techtrees.csv terran_rush_A
 		do_optimization(*game, argv[3]);
