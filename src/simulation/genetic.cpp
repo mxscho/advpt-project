@@ -383,8 +383,10 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 	//Step 8 Best solution nochmal durchlaufen lassen
 	int result=	forwardSimulator(m_race, game, bestsolution->second,1000);
 	if (result > 360 && m_mode == rush)
-	bestsolution->second.pop_back();
-
+	{
+		bestsolution->second.pop_back();
+		bestsolution->second.pop_back();
+	}
 	//hier ausgabe hinzufügen
 	if (m_mode == rush)
 	{
