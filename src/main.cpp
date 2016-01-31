@@ -17,14 +17,14 @@ void do_optimization_rush(const string& unit, Game& game, const string& race) {
 }
 void do_optimization_push(const string& unit, Game& game, const string& race) {
 	// Fastest way to achive a unit.
-	Genetic pushgen(unit, game, 1, race);
+	//Genetic pushgen(unit, game, 1, race);
 
 }
 void do_optimization(Game& game, const string& task) {
 	if (task.compare("terran_rush_A") == 0) {
 		do_optimization_rush("marine", game, "terran");
 	} else if (task.compare("terran_rush_B") == 0) {
-		do_optimization_rush("marauder", game, "terran");
+		//do_optimization_rush("marauder", game, "terran");
 	} else if (task.compare("terran_push_A") == 0) {
 		do_optimization_push("battlecruiser", game, "terran");
 	} else if (task.compare("terran_push_B") == 0) {
@@ -40,7 +40,7 @@ void do_optimization(Game& game, const string& task) {
 	} else if (task.compare("zerg_rush_A") == 0) {
 		do_optimization_rush("zergling", game, "zerg");
 	} else if (task.compare("zerg_rush_B") == 0) {
-		do_optimization_rush("roach", game, "zerg");
+		//do_optimization_rush("roach", game, "zerg");
 	} else if (task.compare("zerg_push_A") == 0) {
 		do_optimization_push("brood_lord", game, "zerg");
 	} else if (task.compare("zerg_push_B") == 0) {
