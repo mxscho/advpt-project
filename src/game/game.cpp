@@ -36,51 +36,92 @@ Game::Game(unsigned int mineral_count, unsigned int vespene_gas_count)
 	m_worker_unit_allocation_function(c_default_worker_allocation_function),
 	m_collected_events() {
 }
+Game::Game(const Game& game)
+	: Updatable(),
+	m_buildings(),
+	m_units(),
+	m_raw_mineral_count(game.m_raw_mineral_count),
+	m_raw_vespene_gas_count(game.m_raw_vespene_gas_count),
+	m_current_building_constructions(),
+	m_building_blueprints(game.m_building_blueprints),
+	m_unit_blueprints(game.m_unit_blueprints),
+	m_worker_unit_allocation({}, {}),
+	m_satisfied_dependencies(game.m_satisfied_dependencies),
+	m_morphing_unit_productions(),
+	m_worker_unit_allocation_function(game.m_worker_unit_allocation_function),
+	m_collected_events() {
+	assert(!is_busy()); // Game cannot be copied while busy.
+	std::transform(game.m_buildings.begin(), game.m_buildings.end(), std::back_inserter(m_buildings), [](std::shared_ptr<Building> building) { return std::shared_ptr<Building>(new Building(*building)); });
+	std::transform(game.m_units.begin(), game.m_units.end(), std::back_inserter(m_units), [](std::shared_ptr<Unit> unit) { return std::shared_ptr<Unit>(new Unit(*unit)); });
+}
+Game& Game::operator=(const Game& game) {
+	assert(!is_busy()); // Game cannot be copied while busy.
+	if (this == &game) {
+		return *this;
+	}
+
+	m_buildings.clear();
+	std::transform(game.m_buildings.begin(), game.m_buildings.end(), m_buildings.begin(), [](std::shared_ptr<Building> building) { return std::shared_ptr<Building>(new Building(*building)); });
+	m_units.clear();
+	std::transform(game.m_units.begin(), game.m_units.end(), m_units.begin(), [](std::shared_ptr<Unit> unit) { return std::shared_ptr<Unit>(new Unit(*unit)); });
+	m_raw_mineral_count = game.m_raw_mineral_count;
+	m_raw_vespene_gas_count = game.m_raw_vespene_gas_count;
+	m_current_building_constructions.clear();
+	m_building_blueprints = game.m_building_blueprints;
+	m_unit_blueprints = game.m_unit_blueprints;
+	m_worker_unit_allocation = WorkerUnitAllocation({}, {});
+	m_satisfied_dependencies = game.m_satisfied_dependencies;
+	m_morphing_unit_productions.clear();
+	m_worker_unit_allocation_function = game.m_worker_unit_allocation_function;
+	m_collected_events.clear();
+	
+	return *this;
+}
 Game::~Game() {
 }
 
-const std::list<BuildingBlueprint>& Game::get_building_blueprints() const {
+const std::list<std::shared_ptr<BuildingBlueprint>>& Game::get_building_blueprints() const {
 	return m_building_blueprints;
 }
 const BuildingBlueprint* Game::find_building_blueprint_by_name(const std::string& name) const {
 	for (auto i = m_building_blueprints.begin(); i != m_building_blueprints.end(); ++i) {
-		if (i->get_name() == name) {
-			return &(*i);
+		if ((*i)->get_name() == name) {
+			return i->get();
 		}
 	}
 	return nullptr;
 }
 BuildingBlueprint* Game::find_building_blueprint_by_name(const std::string& name) {
 	for (auto i = m_building_blueprints.begin(); i != m_building_blueprints.end(); ++i) {
-		if (i->get_name() == name) {
-			return &(*i);
+		if ((*i)->get_name() == name) {
+			return i->get();
 		}
 	}
 	return nullptr;
 }
-void Game::add_building_blueprint(const BuildingBlueprint& building_blueprint) {
+void Game::add_building_blueprint(const std::shared_ptr<BuildingBlueprint>& building_blueprint) {
 	m_building_blueprints.push_back(building_blueprint);
 }
-const std::list<UnitBlueprint>& Game::get_unit_blueprints() const {
+const std::list<std::shared_ptr<UnitBlueprint>>& Game::get_unit_blueprints() const {
 	return m_unit_blueprints;
 }
 const UnitBlueprint* Game::find_unit_blueprint_by_name(const std::string& name) const {
 	for (auto i = m_unit_blueprints.begin(); i != m_unit_blueprints.end(); ++i) {
-		if (i->get_name() == name) {
-			return &(*i);
+		if ((*i)->get_name() == name) {
+			return i->get();
 		}
 	}
 	return nullptr;
 }
 UnitBlueprint* Game::find_unit_blueprint_by_name(const std::string& name) {
 	for (auto i = m_unit_blueprints.begin(); i != m_unit_blueprints.end(); ++i) {
-		if (i->get_name() == name) {
-			return &(*i);
+		if ((*i)->get_name() == name) {
+			return i->get();
 		}
 	}
 	return nullptr;
 }
-void Game::add_unit_blueprint(const UnitBlueprint& unit_blueprint) {
+void Game::add_unit_blueprint(const std::shared_ptr<UnitBlueprint>& unit_blueprint) {
 	m_unit_blueprints.push_back(unit_blueprint);
 }
 unsigned int Game::get_mineral_count() const {
@@ -113,11 +154,19 @@ void Game::add_unit_by_name(const std::string& name) {
 const WorkerUnitAllocation& Game::get_worker_unit_allocation() const {
 	return m_worker_unit_allocation;
 }
+bool Game::is_busy() const {
+	return m_current_building_constructions.size() > 0 ||
+		m_morphing_unit_productions.size() > 0 ||
+		std::any_of(m_buildings.begin(), m_buildings.end(), [](const std::shared_ptr<Building>& building) { return building->get_current_unit_productions().size() > 0; });
+}
 
 unsigned int Game::get_supply_available() const {
 	unsigned int supply_available = 0;
 	for (auto i = m_buildings.begin(); i != m_buildings.end(); ++i) {
 		supply_available += (*i)->get_building_blueprint().get_supply_provided();
+	}
+	for (auto i = m_units.begin(); i != m_units.end(); ++i) {
+		supply_available += (*i)->get_unit_blueprint().get_supply_provided();
 	}
 	return supply_available;
 }
@@ -125,6 +174,15 @@ unsigned int Game::get_supply_used() const {
 	unsigned int supply_used = 0;
 	for (auto i = m_units.begin(); i != m_units.end(); ++i) {
 		supply_used += (*i)->get_unit_blueprint().get_supply_costs();
+	}
+	for (auto i = m_morphing_unit_productions.begin(); i != m_morphing_unit_productions.end(); ++i) {
+		supply_used += (*i)->get_unit_blueprint().get_supply_costs();
+	}
+	for (auto i_building = m_buildings.begin(); i_building != m_buildings.end(); ++i_building) {
+		auto& current_unit_productions = (*i_building)->get_current_unit_productions();
+		for (auto i_current_unit_production = current_unit_productions.begin(); i_current_unit_production != current_unit_productions.end(); ++i_current_unit_production) {
+			supply_used += (*i_current_unit_production)->get_unit_blueprint().get_supply_costs();
+		}
 	}
 	return supply_used;
 }
@@ -435,7 +493,7 @@ bool Game::do_building_constructions_require_morphing(const std::list<std::refer
 	}
 	const BuildingBlueprint& building_blueprint = building_blueprints.front().get();
 	for (auto i_building_blueprint = m_building_blueprints.begin(); i_building_blueprint != m_building_blueprints.end(); ++i_building_blueprint) {
-		auto& morphable_building_blueprints = i_building_blueprint->get_morphable_building_blueprints();
+		auto& morphable_building_blueprints = (*i_building_blueprint)->get_morphable_building_blueprints();
 		for (auto i_morphable_building_blueprint = morphable_building_blueprints.begin(); i_morphable_building_blueprint != morphable_building_blueprints.end(); ++i_morphable_building_blueprint) {
 			if (&i_morphable_building_blueprint->get() == &building_blueprint) {
 				return true;
@@ -443,7 +501,7 @@ bool Game::do_building_constructions_require_morphing(const std::list<std::refer
 		}
 	}
 	for (auto i_unit_blueprint = m_unit_blueprints.begin(); i_unit_blueprint != m_unit_blueprints.end(); ++i_unit_blueprint) {
-		auto& morphable_blueprints = i_unit_blueprint->get_morphable_blueprints();
+		auto& morphable_blueprints = (*i_unit_blueprint)->get_morphable_blueprints();
 		for (auto i_morphable_blueprints = morphable_blueprints.begin(); i_morphable_blueprints != morphable_blueprints.end(); ++i_morphable_blueprints) {
 			if (i_morphable_blueprints->size() == 1 && &i_morphable_blueprints->front().get() == &building_blueprint) {
 				return true;

@@ -1,10 +1,19 @@
 #include "game/zerg_game.h"
 
+#include "game/race.h"
+
 unsigned int ZergGame::c_larva_spawn_duration = 15;
 
 ZergGame::ZergGame(unsigned int mineral_count, unsigned int vespene_gas_count)
 	: Game(mineral_count, vespene_gas_count),
 	m_larva_spawn_remaining_duration(c_larva_spawn_duration) {
+}
+
+Race ZergGame::get_race() const {
+	return Race::Zerg;
+}
+ZergGame* ZergGame::clone() const {
+	return new ZergGame(*this);
 }
 
 void ZergGame::inject_larva() {

@@ -16,6 +16,7 @@ class UnitBlueprint;
 class Building : public Identifiable, public Energetic, public Mortal {
 public:
 	explicit Building(const BuildingBlueprint& building_blueprint);
+	Building(const Building& building);
 
 	const BuildingBlueprint& get_building_blueprint() const;
 	const std::list<std::shared_ptr<UnitProduction>>& get_current_unit_productions() const;

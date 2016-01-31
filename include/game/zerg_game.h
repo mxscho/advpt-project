@@ -2,11 +2,16 @@
 
 #include "game/game.h"
 
+enum class Race;
+
 class ZergGame : public Game {
 public:
 	static unsigned int c_larva_spawn_duration;
 
 	ZergGame(unsigned int mineral_count, unsigned int vespene_gas_count);
+
+	virtual Race get_race() const override;
+	virtual ZergGame* clone() const override;
 
 	void inject_larva();
 

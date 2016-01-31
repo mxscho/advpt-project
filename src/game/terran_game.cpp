@@ -9,6 +9,13 @@ TerranGame::TerranGame(unsigned int mineral_count, unsigned int vespene_gas_coun
 	: Game(mineral_count, vespene_gas_count) {
 }
 
+Race TerranGame::get_race() const {
+	return Race::Terran;
+}
+TerranGame* TerranGame::clone() const {
+	return new TerranGame(*this);
+}
+
 bool TerranGame::can_construct_buildings_by_names(const std::list<std::string>& names) const {
 	return Game::can_construct_buildings_by_names(names) && find_builder_units().size() > 0;
 }

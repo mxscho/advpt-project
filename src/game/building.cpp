@@ -13,6 +13,13 @@ Building::Building(const BuildingBlueprint& building_blueprint)
 	m_building_blueprint(building_blueprint),
 	m_current_unit_productions() {
 }
+Building::Building(const Building& building)
+	: Identifiable(),
+	Energetic(building.m_building_blueprint),
+	Mortal(building.m_building_blueprint),
+	m_building_blueprint(building.m_building_blueprint),
+	m_current_unit_productions() {
+}
 
 const BuildingBlueprint& Building::get_building_blueprint() const {
 	return m_building_blueprint;

@@ -1,4 +1,7 @@
-#include "game/genetic.h"
+#include "simulation/genetic.h"
+
+#include "simulation/forward_simulator.h"
+
 #define push 1
 #define rush 0
 
@@ -31,18 +34,18 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			
 			if (rndtyp == 0)
 			{
-				std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-				std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+				std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+				std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 				std::advance(it, randnmb);
 				
-				temp = (it)->get_name();
+				temp = (*it)->get_name();
 			}
 			else
 			{
-				std::list<BuildingBlueprint> i_building = game.get_building_blueprints();
-				std::list<BuildingBlueprint>::iterator it = i_building.begin();
+				std::list<std::shared_ptr<BuildingBlueprint>> i_building = game.get_building_blueprints();
+				std::list<std::shared_ptr<BuildingBlueprint>>::iterator it = i_building.begin();
 				std::advance(it, randnmb);
-				temp = (it)->get_name();
+				temp = (*it)->get_name();
 			}
 						
 			buildlist.push_back(temp);
@@ -343,8 +346,7 @@ void Genetic::reproduction(Game& game)
 		{ 
 			counter = 0;
 			distanztemp = 0;
-			itfirstpro = firstpro->second.begin();
-			for (itfirstpro; itfirstpro != firstpro->second.end(); ++itfirstpro)
+			for (itfirstpro = firstpro->second.begin(); itfirstpro != firstpro->second.end(); ++itfirstpro)
 			{
 				if(d==0)
 				{ 
@@ -367,10 +369,10 @@ void Genetic::reproduction(Game& game)
 					itsecondpro++;
 					if (secondpro->second.end() == itsecondpro)
 					{
-						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-						string tempstr = (it)->get_name();
+						string tempstr = (*it)->get_name();
 						secondpro->second.push_back(tempstr);
 					}
 				}
@@ -396,10 +398,10 @@ void Genetic::reproduction(Game& game)
 					itthirdpro++;
 					if (thirdpro->second.end() == itthirdpro)
 					{
-						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-						string tempstr = (it)->get_name();
+						string tempstr = (*it)->get_name();
 						thirdpro->second.push_back(tempstr);
 					}
 				}
@@ -424,10 +426,10 @@ void Genetic::reproduction(Game& game)
 					itfourthpro++;
 					if (fourthpro->second.end() == itfourthpro)
 					{
-						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-						string tempstr = (it)->get_name();
+						string tempstr = (*it)->get_name();
 						fourthpro->second.push_back(tempstr);
 					}
 				
@@ -439,8 +441,7 @@ void Genetic::reproduction(Game& game)
 		{
 			counter = 0;
 			distanztemp = 0;
-			itsecondpro = secondpro->second.begin();
-			for (itsecondpro; itsecondpro != secondpro->second.end(); ++itsecondpro)
+			for (itsecondpro = secondpro->second.begin(); itsecondpro != secondpro->second.end(); ++itsecondpro)
 			{
 				if (e == 0)
 				{
@@ -464,10 +465,10 @@ void Genetic::reproduction(Game& game)
 					itthirdpro++;
 					if (thirdpro->second.end() == itthirdpro)
 					{
-						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-						string tempstr = (it)->get_name();
+						string tempstr = (*it)->get_name();
 						thirdpro->second.push_back(tempstr);
 					}
 				}
@@ -493,10 +494,10 @@ void Genetic::reproduction(Game& game)
 					itfourthpro++;
 					if (fourthpro->second.end() == itfourthpro)
 					{
-						std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-						string tempstr = (it)->get_name();
+						string tempstr = (*it)->get_name();
 						fourthpro->second.push_back(tempstr);
 					}
 				}
@@ -504,8 +505,7 @@ void Genetic::reproduction(Game& game)
 		}
 		counter = 0;
 		distanztemp = 0;
-		itthirdpro = thirdpro->second.begin();
-		for (itthirdpro; itthirdpro != thirdpro->second.end(); ++itthirdpro)
+		for (itthirdpro = thirdpro->second.begin(); itthirdpro != thirdpro->second.end(); ++itthirdpro)
 		{
 			
 				if (itthirdpro->compare(itfourthpro->c_str()) == 0)
@@ -528,10 +528,10 @@ void Genetic::reproduction(Game& game)
 				itfourthpro++;
 				if (fourthpro->second.end() == itfourthpro)
 				{
-					std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-					std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+					std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+					std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-					string tempstr = (it)->get_name();
+					string tempstr = (*it)->get_name();
 					fourthpro->second.push_back(tempstr);
 				}
 			}
@@ -562,10 +562,10 @@ void Genetic::reproduction(Game& game)
 		{ 
 			if (winnertwo->second.end() == itwinnertwo)
 			{
-				std::list<UnitBlueprint> i_UnitBlueprint = game.get_unit_blueprints();
-				std::list<UnitBlueprint>::iterator it = i_UnitBlueprint.begin();
+				std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+				std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
-				string tempstr = (it)->get_name();
+				string tempstr = (*it)->get_name();
 				winnertwo->second.push_back(tempstr);
 			}
 			if (genrand == 0)
@@ -763,14 +763,19 @@ int Genetic::fitness(std::list<std::string> buildlist)
 }
 
 
-
+int Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist) {
+	ForwardSimulator forward_simulator(game);
+	forward_simulator.simulate(buildlist, 1000);
+	return forward_simulator.is_successful() ? forward_simulator.get_time() : 0;
+}
+/*
 //TODO:: auf Integer umändern, so dass man die Zeit zurück bekommt, die Simuliert wurde.WEnn Zeit überschritten
 //oder nicht valid, eine 0 zurückgeben
 int  Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist)
 {
 
 	buildlist.remove_if([](const string& buildlist_entry) { return buildlist_entry == ""; });
-	OutputFormatter output_formatter(race);
+	//OutputFormatter output_formatter(race);
 	unsigned int time = 0;
 	game.set_worker_unit_allocation_function([](const Game& game, const std::list<std::shared_ptr<Unit>>& worker_units) {
 		// TODO: Improve.
@@ -801,7 +806,7 @@ int  Genetic::forwardSimulator(const string& race, Game& game, std::list<std::st
 			std::list<std::unique_ptr<Event>> events = game.update(1);
 			++time;
 			if (events.size() > 0) {
-				output_formatter.add_event(time, game, events);
+				//output_formatter.add_event(time, game, events);
 			}
 			building = game.can_construct_buildings_by_names(names);
 			unit = game.can_produce_units_by_names(names);
@@ -821,29 +826,29 @@ int  Genetic::forwardSimulator(const string& race, Game& game, std::list<std::st
 	}
 	if (time <= 1000) {
 		
-		output_formatter.set_validity(true);
+		//output_formatter.set_validity(true);
 		// TODO: This needs improvement.
 		// Just simulate another 200 seconds to get all finished events.
 		for (unsigned int i = 0; i < 200; ++i) {
 			time++;
 			std::list<std::unique_ptr<Event>> events = game.update(1);
 			if (events.size() > 0) {
-				output_formatter.add_event(time, game, events);
+				//output_formatter.add_event(time, game, events);
 			}
 			else
 			{
-				output_formatter.print();
+				//output_formatter.print();
 				return time;
 			}
 		}
 	}
 	else {
 		return 0; // Angenommen er kann nicht gebaut werden
-		output_formatter.set_validity(false);
+		//output_formatter.set_validity(false);
 	}
-	output_formatter.print();
+	//output_formatter.print();
 	return time;
 }
 
-
+*/
 

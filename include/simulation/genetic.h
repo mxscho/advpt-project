@@ -15,7 +15,7 @@
 #include "game/events/unit_production_start_event.h"
 #include "game/events/building_construction_finish_event.h"
 #include "game/events/building_construction_start_event.h"
-#include "game/output_formatter.h"
+#include "io/output_formatter.h"
 
 
 #include <functional>

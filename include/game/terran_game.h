@@ -7,10 +7,14 @@
 #include <memory>
 
 class Event;
+enum class Race;
 
 class TerranGame : public Game {
 public:
 	TerranGame(unsigned int mineral_count, unsigned int vespene_gas_count);
+
+	virtual Race get_race() const override;
+	virtual TerranGame* clone() const override;
 
 	virtual bool can_construct_buildings_by_names(const std::list<std::string>& names) const override;
 	void call_mule();

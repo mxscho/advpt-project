@@ -36,7 +36,6 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/game.h
 	${HEADER_DIRECTORY}/game/identifiable.h
 	${HEADER_DIRECTORY}/game/mortal.h
-	${HEADER_DIRECTORY}/game/output_formatter.h
 	${HEADER_DIRECTORY}/game/protoss_game.h
 	${HEADER_DIRECTORY}/game/race.h
 	${HEADER_DIRECTORY}/game/terran_building_construction.h
@@ -47,7 +46,6 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/updatable.h
 	${HEADER_DIRECTORY}/game/worker_unit_allocation.h
 	${HEADER_DIRECTORY}/game/zerg_game.h
-	${HEADER_DIRECTORY}/game/genetic.h
 	${HEADER_DIRECTORY}/game/events/building_construction_event.h
 	${HEADER_DIRECTORY}/game/events/building_construction_finish_event.h
 	${HEADER_DIRECTORY}/game/events/building_construction_start_event.h
@@ -59,6 +57,10 @@ set(HEADER_FILES
 	${HEADER_DIRECTORY}/game/events/unit_production_event.h
 	${HEADER_DIRECTORY}/game/events/unit_production_finish_event.h
 	${HEADER_DIRECTORY}/game/events/unit_production_start_event.h
+	${HEADER_DIRECTORY}/io/config_parser.h
+	${HEADER_DIRECTORY}/io/output_formatter.h
+	${HEADER_DIRECTORY}/simulation/forward_simulator.h
+	${HEADER_DIRECTORY}/simulation/genetic.h
 )
 set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/main.cpp
@@ -70,7 +72,6 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/game.cpp
 	${SOURCE_DIRECTORY}/game/identifiable.cpp
 	${SOURCE_DIRECTORY}/game/mortal.cpp
-	${SOURCE_DIRECTORY}/game/output_formatter.cpp
 	${SOURCE_DIRECTORY}/game/protoss_game.cpp
 	${SOURCE_DIRECTORY}/game/race.cpp
 	${SOURCE_DIRECTORY}/game/terran_building_construction.cpp
@@ -81,7 +82,6 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/updatable.cpp
 	${SOURCE_DIRECTORY}/game/worker_unit_allocation.cpp
 	${SOURCE_DIRECTORY}/game/zerg_game.cpp
-	${SOURCE_DIRECTORY}/game/genetic.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_event.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_finish_event.cpp
 	${SOURCE_DIRECTORY}/game/events/building_construction_start_event.cpp
@@ -93,6 +93,10 @@ set(SOURCE_FILES
 	${SOURCE_DIRECTORY}/game/events/unit_production_event.cpp
 	${SOURCE_DIRECTORY}/game/events/unit_production_finish_event.cpp
 	${SOURCE_DIRECTORY}/game/events/unit_production_start_event.cpp
+	${SOURCE_DIRECTORY}/io/config_parser.cpp
+	${SOURCE_DIRECTORY}/io/output_formatter.cpp
+	${SOURCE_DIRECTORY}/simulation/forward_simulator.cpp
+	${SOURCE_DIRECTORY}/simulation/genetic.cpp
 )
 
 # Add binary.

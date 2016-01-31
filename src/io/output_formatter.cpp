@@ -1,17 +1,17 @@
-#include "game/output_formatter.h"
+#include "io/output_formatter.h"
 
 #include "game/building_construction.h"
 #include "game/events/building_construction_start_event.h"
 #include "game/events/building_construction_finish_event.h"
 #include "game/events/unit_production_start_event.h"
 #include "game/events/unit_production_finish_event.h"
+#include "game/race.h"
 
 #include "boost/property_tree/json_parser.hpp"
 #include <iostream>
 
-OutputFormatter::OutputFormatter(std::string game) {
-	output.put("game", game);
-	output.put("buildListValid", "1");
+OutputFormatter::OutputFormatter(const Race& race)
+	: race(race) {
 }
 
 void OutputFormatter::add_event(unsigned int time, Game& game, const std::list<std::unique_ptr<Event>>& events) {
@@ -75,9 +75,12 @@ void OutputFormatter::add_event(unsigned int time, Game& game, const std::list<s
 
 //void OutputFormatter::initialize() {}
 
-void OutputFormatter::print() {
+void OutputFormatter::print() const {
+	ptree output;
+	output.put("game", get_race_string(race));
+	output.put("buildlistValid", validity ? "1" : "0");
 	// only add messages if the build list is considered valid
-	if (output.get<std::string>("buildListValid") == "1") {
+	if (output.get<std::string>("buildlistValid") == "1") {
 		output.add_child("messages", messages);
 	}
 
@@ -86,9 +89,5 @@ void OutputFormatter::print() {
 }
 
 void OutputFormatter::set_validity(bool valid) {
-	if (valid) {
-		output.put("buildListValid", "1");
-	} else {
-		output.put("buildListValid", "0");
-	}
+	validity = valid;
 }
