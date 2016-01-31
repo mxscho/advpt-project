@@ -4,7 +4,7 @@
 
 #define push 1
 #define rush 0
-
+#define individuals 20
 
 Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 {
@@ -23,35 +23,224 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 	int rndtyp = 0;
 	bool correctunit = false;
 	bool listvalid = true;
+	bool depend = false;
+	bool marphab = false;
 	std::string temp = "";
+	int tries = 0;
 	//Step 1 build a initialize population
 
-	for (int a=0; a < 20;a++)
+	for (int a=0; a < individuals;a++)
 	{
 		correctunit = false;
 		listvalid = true;
 		randnmb = 0;
 		rndtyp = 0;
+		
+		buildlist.clear();
 		while (listvalid)
 		{
-			
-			if (rndtyp == 0)
+			depend = false;
+			marphab = false;
+			while(!depend)
 			{
-				std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
-				std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
-				std::advance(it, randnmb);
+				if (rndtyp == 0)
+				{
+					//Alle Units einlesen
+					std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();				
+					std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
+					//Zufällige Unit wählen
+					std::advance(it, randnmb);
+					//Liste aller Gebäude
+					std::list<std::shared_ptr<BuildingBlueprint>> i_building = game.get_building_blueprints();
+					//Name der Unit
+					temp = (*it)->get_name();
+					//Alle Gebäude durchlaufen
+					for (std::list<std::shared_ptr<BuildingBlueprint>>::iterator it = i_building.begin(); it != i_building.end(); ++it)
+					{
+						//WAs kann das gebäude alles Produzieren
+						const std::list<std::reference_wrapper<const UnitBlueprint>> tep=(*it)->get_producible_unit_blueprints();	
+						//Liste davon durchlaufen
+						for (std::list<std::reference_wrapper<const UnitBlueprint>>::const_iterator ite = tep.begin(); ite != tep.end(); ++ite)
+							{
+								//Ist meine Unit mit auf dem Plan
+								if (ite->get().get_name().compare(temp) == 0)
+								{
+									//Ist es das Command center bzw das erste GEbäude
+									if (it == i_building.begin())
+									{
+										//Wenn ja fertig
+										depend = true;
+										ite = tep.end();
+										it = i_building.end();
+										it--;
+										break;
+									}
+									else
+									{
+										//Buildliste durchlaufen ob wir das Gebäude schon haben
+										for (std::list<std::string>::iterator its = buildlist.begin(); its != buildlist.end(); ++its)
+										{
+											if (its->compare((*it)->get_name()) == 0)
+											{
+												depend = true;
+												its = buildlist.end();
+												ite = tep.end();
+												ite--;
+												it = i_building.end();
+												it--;
+												break;
+											}
+										}
+									}
+								}
+								
+							}
+					}			
+				}
+				else
+				{
+
+					std::list<std::shared_ptr<BuildingBlueprint>> i_building = game.get_building_blueprints();
+					std::list<std::shared_ptr<BuildingBlueprint>>::iterator it = i_building.begin();
+	
+					std::advance(it, randnmb);
+					
+					const std::list<std::reference_wrapper<const Blueprint>> tep = (*it)->get_dependency_blueprints();
+					temp = (*it)->get_name();
 				
-				temp = (*it)->get_name();
+						for (std::list<std::shared_ptr<BuildingBlueprint>>::iterator ito = i_building.begin(); ito != i_building.end(); ++ito)
+						{						
+							const std::list<std::reference_wrapper<const BuildingBlueprint>> tmorp = (*ito)->get_morphable_building_blueprints();
+							
+							for (std::list<std::reference_wrapper<const BuildingBlueprint>>::const_iterator ite = tmorp.begin(); ite != tmorp.end(); ++ite)
+							{
+								if (ite->get().get_name().compare(temp) == 0)
+								{
+
+									marphab = true;
+									if ((*ito)->get_name().compare((*i_building.begin())->get_name())== 0)
+									{
+										depend = true;						
+										ito = i_building.end();
+										ito--;
+										break;
+									}
+
+
+									for (std::list<std::string>::iterator it = buildlist.begin(); it != buildlist.end(); ++it)
+									{
+										if (it->compare((*ito)->get_name())==0)
+										{
+											depend = true;
+											ite = tmorp.end();
+											ite--;
+											ito = i_building.end();
+											ito--;
+											break;
+									
+										}
+
+									}
+								}
+
+							}
+
+							
+						}
+						if (!marphab)
+						{
+							if (tep.empty())
+								depend = true;
+							for (std::list<std::reference_wrapper<const Blueprint>>::const_iterator ite = tep.begin(); ite != tep.end(); ++ite)
+							{
+								if (ite->get().get_name().compare((*i_building.begin())->get_name()) == 0)
+								{
+									depend = true;
+									break;
+								}
+								for (std::list<std::string>::iterator it = buildlist.begin(); it != buildlist.end(); ++it)
+								{
+									if (it->compare(ite->get().get_name()) == 0)
+									{
+										depend = true;
+										break;
+									}
+
+								}
+
+							}
+						}
+										
+					}
+
+
+				
+			
+				if (!depend)
+				{
+					marphab = false;
+					rndtyp = rand() % 2;
+					if (rndtyp == 0)
+					{
+						randnmb = rand() % game.get_unit_blueprints().size();
+					}
+					else
+					{
+						randnmb = rand() % (game.get_building_blueprints().size()-1)+1;
+					}
+				}
+			
+			}
+			buildlist.push_back(temp);
+
+
+			if (m_mode == rush)
+			{
+				if (temp.compare(unit) == 0 || correctunit )
+				{
+					int timefor = forwardSimulator(m_race, game, buildlist);
+					
+					if (timefor>0)
+					{
+						correctunit = true;
+						tries = 0;
+						if (timefor > 360 && m_mode == rush)	//wenn bei rush, abbrechen, wenn die liste länger als 6 min ist erstmal 600, später dann 360
+						{
+							buildlist.pop_back();
+							listvalid = false;
+
+							break;
+						}					
+					}
+					else
+					{
+						if (correctunit)
+						{
+							buildlist.pop_back();
+							tries++;
+							if (tries == 100)
+							{
+								listvalid = false;
+								tries = 0;
+								break;
+							}
+
+						}
+						else
+						{
+							listvalid = true;
+							break;
+						}
+					}
+
+
+				}
+				
 			}
 			else
 			{
-				std::list<std::shared_ptr<BuildingBlueprint>> i_building = game.get_building_blueprints();
-				std::list<std::shared_ptr<BuildingBlueprint>>::iterator it = i_building.begin();
-				std::advance(it, randnmb);
-				temp = (*it)->get_name();
-			}
-						
-			buildlist.push_back(temp);
+
+
 			int timefor = forwardSimulator(m_race, game, buildlist);
 			if (timefor>0)
 			{
@@ -62,14 +251,36 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 					
 					break;
 				}
+				else if (timefor>900 && m_mode==push)
+				{
+					break;
+				}
 			
 			}
 			else
 			{
 				buildlist.pop_back();
 			}
+
+
+
+			
+
+
 			//Randomizer ob Unit oder Building
 			//Randomizer welche Unit/Building
+						
+				std::list<std::string>::iterator ite = buildlist.end();		
+				ite--;
+				temp = { *ite };
+
+				if (temp.compare(unit)==0)
+				{				
+					correctunit = true;
+					if(m_mode==push)
+						listvalid = false;				
+				}
+			}
 			rndtyp = rand() % 2;
 			if (rndtyp == 0)
 			{
@@ -77,41 +288,53 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 			}
 			else
 			{
-				randnmb = rand() % game.get_building_blueprints().size();
-			}					
-			std::list<std::string>::iterator ite = buildlist.end();		
-			ite--;
-			temp = { *ite };
-
-			if (temp.compare(unit)==0)
-			{				
-				correctunit = true;
-				if(m_mode==push)
-					listvalid = false;				
+				randnmb = rand() % (game.get_building_blueprints().size() - 1) + 1;
 			}
+
+			if (buildlist.size() > 100)
+				listvalid = false;
 		}
 		//Step 2 direkt die Fitness mitberechnen
+		
+
+
+
 		if (correctunit == true)
 		{
 			std::pair<int, std::list<std::string>> listemp;
 			if (m_mode == push)
 			{
-				listemp.first = fitness(buildlist);
+				listemp.first = forwardSimulator(m_race, game, buildlist);
 			}
 			else
 			{
-				listemp.first = forwardSimulator(m_race, game, buildlist);
+				
+				listemp.first = fitness(buildlist);
 			}
 			listemp.second = buildlist;
 			population.push_back(listemp);
 		}
 		else
-			a--;
+		{
+
+			if (m_mode == rush)
+			{
+			//	std::pair<int, std::list<std::string>> listemp;
+			//	listemp.first = fitness(buildlist);
+			//	listemp.second = buildlist;
+			//	population.push_back(listemp);
+				a--;
+			}
+			else
+			{
+				a--;
+			}
+		}
 
 	}
 
 	//Ab hier die Genetische Schleife 50 Generationen
-	for (int b = 0; b < 50;b++)
+	for (int b = 0; b < 5;b++)
 	{
 
 		//Step 3 Selection
@@ -128,6 +351,7 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 		//Step 6 Newpopulation to Population
 		population.clear();
 		population = newpopulation;
+		newpopulation.clear();
 		
 	}
 	//Step 7 Denn besten auswählen
@@ -155,12 +379,23 @@ Genetic::Genetic(const string& unit, Game& game, int mode, const string& race)
 		}
 	}
 	//Step 8 Best solution nochmal durchlaufen lassen
-	forwardSimulator(m_race, game, bestsolution->second);
+	int result=	forwardSimulator(m_race, game, bestsolution->second);
+	if (result > 360 && m_mode == rush)
+	bestsolution->second.pop_back();
+
+	//hier ausgabe hinzufügen
+	if (m_mode == rush)
+	{
+		ForwardSimulator forward_simulator(game);
+		forward_simulator.simulate(bestsolution->second, 360);
+		forward_simulator.get_output_formatter().print();
+	}
+
 }
 
 void Genetic::mutation()
 {
-	for (int a = 0;a < 5;a++)
+	for (int a = 0;a < 4;a++)
 	{
 		int bestfitness = 0;
 		if (m_mode == push)//push
@@ -212,7 +447,7 @@ void Genetic::reproduction(Game& game)
 	std::list<std::pair<int, std::list<std::string>>>::iterator winnertwo;
 
 	// 15 neue Individueen und die 5 besten alten wieder übernehmen
-	for (int a = 0; a < 15;a++)
+	for (int a = 0; a < individuals-4;a++)
 	{
 		// 4 zufällige Individueen //gewichtet nach den besten 	Fitness werten
 		for (int b = 0; b < 4;b++)
@@ -221,18 +456,30 @@ void Genetic::reproduction(Game& game)
 			{
 				if (m_mode == rush)//rush
 				{
-					if (it->first > rand() % (m_bestfitnes))
+					if (it->first > rand() % (m_bestfitnes+1))
 					{
 						if (b == 0)
+						{
 							firstpro = it;
-						else if (b == 1)
+							break;
+						}
+						else if (b == 1 && firstpro != it)
+						{
 							secondpro = it;
-						else if (b == 2)
+							break;
+						}
+						else if (b == 2 && firstpro != it && secondpro != it)
+						{
 							thirdpro = it;
-						else if (b == 3)
+							break;
+						}
+						else if (b == 3 && firstpro != it && secondpro != it && thirdpro != it)
+						{
 							fourthpro = it;
+							break;
+						}
+						
 
-						it = population.end();
 					}
 				}
 				else
@@ -240,15 +487,25 @@ void Genetic::reproduction(Game& game)
 					if ((m_fitnesspushmax- it->first )> rand() % (m_fitnesspushmax-m_bestfitnes))
 					{
 						if (b == 0)
+						{
 							firstpro = it;
-						else if (b == 1)
+							break;
+						}
+						else if (b == 1 && firstpro != it)
+						{
 							secondpro = it;
-						else if (b == 2)
+							break;
+						}
+						else if (b == 2 && firstpro != it && secondpro != it)
+						{
 							thirdpro = it;
-						else if (b == 3)
+							break;
+						}
+						else if (b == 3 && firstpro != it && secondpro != it && thirdpro != it)
+						{
 							fourthpro = it;
-
-						it = population.end();
+							break;
+						}
 					}
 				}
 				
@@ -333,14 +590,14 @@ void Genetic::reproduction(Game& game)
 				fourthpro = temp;
 			}
 
-
+			 itfirstpro = firstpro->second.begin();
+			 itsecondpro = secondpro->second.begin();
+			itthirdpro = thirdpro->second.begin();
+			itfourthpro = fourthpro->second.begin();
 		
-
-
-
-
-
-
+		
+		winnerone = firstpro;
+		winnertwo = secondpro;
 
 		int distanzbest = 0;
 		int distanztemp = 0;
@@ -353,6 +610,19 @@ void Genetic::reproduction(Game& game)
 			{
 				if(d==0)
 				{ 
+
+
+					if (secondpro->second.end() == itsecondpro)
+					{
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (*it)->get_name();
+						secondpro->second.push_back(tempstr);
+						itsecondpro--;
+					}
+
+
 					if (itfirstpro->compare(itsecondpro->c_str()) == 0)
 					{
 						//do Nothing
@@ -370,17 +640,24 @@ void Genetic::reproduction(Game& game)
 					}
 					counter++;
 					itsecondpro++;
-					if (secondpro->second.end() == itsecondpro)
+					
+				}
+				else if (d == 1)
+				{
+
+
+
+					if (thirdpro->second.end() == itthirdpro)
 					{
 						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
 						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
 						string tempstr = (*it)->get_name();
-						secondpro->second.push_back(tempstr);
+						thirdpro->second.push_back(tempstr);
+						itthirdpro--;
 					}
-				}
-				else if (d == 1)
-				{
+
+
 					if (itfirstpro->compare(itthirdpro->c_str()) == 0)
 					{
 						//do Nothing
@@ -399,17 +676,21 @@ void Genetic::reproduction(Game& game)
 					counter++;
 					
 					itthirdpro++;
-					if (thirdpro->second.end() == itthirdpro)
+					
+				}
+				else if (d == 2)
+				{
+
+					if (fourthpro->second.end() == itfourthpro)
 					{
 						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
 						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
 						string tempstr = (*it)->get_name();
-						thirdpro->second.push_back(tempstr);
+						fourthpro->second.push_back(tempstr);
+						itfourthpro--;
 					}
-				}
-				else if (d == 2)
-				{
+
 					if (itfirstpro->compare(itfourthpro->c_str()) == 0)
 					{
 						//do Nothing
@@ -427,19 +708,16 @@ void Genetic::reproduction(Game& game)
 					}
 					counter++;
 					itfourthpro++;
-					if (fourthpro->second.end() == itfourthpro)
-					{
-						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
-
-						string tempstr = (*it)->get_name();
-						fourthpro->second.push_back(tempstr);
-					}
+					
 				
 				}
 			}
 	
 		}
+		itfirstpro = firstpro->second.begin();
+		itsecondpro = secondpro->second.begin();
+		itthirdpro = thirdpro->second.begin();
+		itfourthpro = fourthpro->second.begin();
 		for (int e = 0;e < 2;e++)
 		{
 			counter = 0;
@@ -448,6 +726,15 @@ void Genetic::reproduction(Game& game)
 			{
 				if (e == 0)
 				{
+					if (thirdpro->second.end() == itthirdpro)
+					{
+						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
+
+						string tempstr = (*it)->get_name();
+						thirdpro->second.push_back(tempstr);
+						itthirdpro--;
+					}
 					if (itsecondpro->compare(itthirdpro->c_str()) == 0)
 					{
 						//do Nothing
@@ -466,17 +753,19 @@ void Genetic::reproduction(Game& game)
 					counter++;
 					
 					itthirdpro++;
-					if (thirdpro->second.end() == itthirdpro)
+					
+				}
+				else if (e == 1)
+				{
+					if (fourthpro->second.end() == itfourthpro)
 					{
 						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
 						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
 
 						string tempstr = (*it)->get_name();
-						thirdpro->second.push_back(tempstr);
+						fourthpro->second.push_back(tempstr);
+						itfourthpro--;
 					}
-				}
-				else if (e == 1)
-				{
 					if (itsecondpro->compare(itfourthpro->c_str()) == 0)
 					{
 						//do Nothing
@@ -495,22 +784,29 @@ void Genetic::reproduction(Game& game)
 					counter++;
 					
 					itfourthpro++;
-					if (fourthpro->second.end() == itfourthpro)
-					{
-						std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
-						std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
-
-						string tempstr = (*it)->get_name();
-						fourthpro->second.push_back(tempstr);
-					}
+					
 				}
 			}
 		}
+		
+		
+		itfirstpro = firstpro->second.begin();
+		itsecondpro = secondpro->second.begin();
+		itthirdpro = thirdpro->second.begin();
+		itfourthpro = fourthpro->second.begin();
 		counter = 0;
 		distanztemp = 0;
 		for (itthirdpro = thirdpro->second.begin(); itthirdpro != thirdpro->second.end(); ++itthirdpro)
 		{
-			
+			if (fourthpro->second.end() == itfourthpro)
+			{
+				std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
+				std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
+
+				string tempstr = (*it)->get_name();
+				fourthpro->second.push_back(tempstr);
+				itfourthpro--;
+			}
 				if (itthirdpro->compare(itfourthpro->c_str()) == 0)
 				{
 					//do Nothing
@@ -529,19 +825,12 @@ void Genetic::reproduction(Game& game)
 				counter++;
 				
 				itfourthpro++;
-				if (fourthpro->second.end() == itfourthpro)
-				{
-					std::list<std::shared_ptr<UnitBlueprint>> i_UnitBlueprint = game.get_unit_blueprints();
-					std::list<std::shared_ptr<UnitBlueprint>>::iterator it = i_UnitBlueprint.begin();
-
-					string tempstr = (*it)->get_name();
-					fourthpro->second.push_back(tempstr);
-				}
+				
 			}
 
 		
 		//Bei jedem Gen zufällig wählen welches, aber jedesmal prüfen ob es geht.
-		//Copy von game
+	
 		std::list<std::string> tempbuildlist;
 		std::list<std::string>::iterator itwinnerone = winnerone->second.begin();
 		std::list<std::string>::iterator itwinnertwo = winnertwo->second.begin();
@@ -585,11 +874,22 @@ void Genetic::reproduction(Game& game)
 				genrand = rand() % 2;
 				itwinnerone++;
 				itwinnertwo++;
+				genable = true;
 			}
 			else
 			{
 
 				tempbuildlist.pop_back();
+
+
+				if (!genable)
+				{
+					
+					break;
+					//abbruch der schleife, da keine der beiden Gene machbar ist
+				}
+
+
 				if (genrand == 0)
 				{				
 					genrand = 1;
@@ -600,12 +900,7 @@ void Genetic::reproduction(Game& game)
 					genrand = 0;
 					genable = false;
 				}
-				if (!genable)
-				{
-					a--;
-					break;
-					//abbruch der schleife, da keine der beiden Gene machbar ist
-				}
+				
 
 			}
 		}
@@ -635,7 +930,7 @@ void Genetic::selection()
 	int worker = 0;
 	int speed = 100;
 	int fitness = 0;
-	if (m_mode == rush) //rush
+	if (m_mode == push) //rush
 		fitness = 100;
 	for (std::list<std::pair<int, std::list<std::string>>>::iterator it = population.begin(); it != population.end(); ++it)
 	{
@@ -692,6 +987,7 @@ void Genetic::selection()
 		for (std::list<std::string>::iterator ite = it->second.begin(); ite != it->second.end(); ++ite)
 		{
 			tempspeed++;
+			tempfirst = it;
 			if (ite->compare(m_unit) == 0)
 			{
 				if (speed > tempspeed)
@@ -702,6 +998,7 @@ void Genetic::selection()
 				else
 				{
 					ite = it->second.end();
+					ite--;
 				}
 			}
 		}
@@ -712,14 +1009,14 @@ void Genetic::selection()
 		if (m_mode == push) //push
 		{
 			//find best
-			if (it->first > fitness)
+			if (it->first < fitness)
 			{
 				fitness = it->first;
 			}
 		}
 		else //rush
 		{
-			if (it->first < fitness)
+			if (it->first > fitness)
 			{
 				fitness = it->first;
 			}
@@ -728,14 +1025,14 @@ void Genetic::selection()
 	m_bestfitnes = fitness;
 	if (m_mode == push) //push
 	{
-		tempit->first = m_bestfitnes+1;
-		tempfirst->first = m_bestfitnes + 1;
+		tempit->first = m_bestfitnes;
+		tempfirst->first = m_bestfitnes ;
 		//tempprod->first = m_bestfitnes + 1;
 	}
 	else //rush
 	{
-		tempit->first = m_bestfitnes-1;
-		tempfirst->first = m_bestfitnes - 1;
+		tempit->first = m_bestfitnes;
+		tempfirst->first = m_bestfitnes ;
 		//tempprod->first = m_bestfitnes - 1;
 	}
 }
@@ -768,7 +1065,7 @@ int Genetic::fitness(std::list<std::string> buildlist)
 
 int Genetic::forwardSimulator(const string& race, Game& game, std::list<std::string> buildlist) {
 	ForwardSimulator forward_simulator(game);
-	forward_simulator.simulate(buildlist, 10000);
+	forward_simulator.simulate(buildlist, 400);
 	return forward_simulator.is_successful() ? forward_simulator.get_time() : 0;
 }
 /*
